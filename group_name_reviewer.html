@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group Name Ideas</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'Inter', sans-serif; background: #0c0c0c; color: #e0e0e0; min-height: 100vh; }
+
+.header {
+  padding: 28px 36px 0; background: #0c0c0c;
+  position: sticky; top: 0; z-index: 200;
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.title {
+  font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+  background: linear-gradient(100deg, #f0c27f 0%, #e8855a 60%, #c94073 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.header-actions { display: flex; gap: 10px; align-items: center; }
+.header-btn {
+  padding: 7px 16px; border-radius: 8px; border: 1px solid #2a2a2a;
+  background: #161616; color: #bbb; font-size: 13px; font-family: inherit;
+  cursor: pointer; transition: all .15s;
+}
+.header-btn:hover { background: #1e1e1e; border-color: #444; color: #fff; }
+.header-btn.notes-active { background: #1a1520; border-color: #7c3aed55; color: #a78bfa; }
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+  animation: pulse 2s infinite;
+}
+.live-dot.offline { background: #ef4444; animation: none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid #1a1a1a; }
+.tab {
+  padding: 10px 18px; font-size: 13px; font-weight: 500; color: #555;
+  cursor: pointer; border: none; background: none; font-family: inherit;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .15s;
+}
+.tab:hover { color: #999; }
+.tab.active { color: #f0f0f0; border-bottom-color: #e8855a; }
+.tab .badge {
+  display: inline-block; background: #2a2a2a; color: #888;
+  border-radius: 10px; font-size: 11px; padding: 1px 7px; margin-left: 6px;
+}
+.tab.active .badge { background: #e8855a22; color: #e8855a; }
+
+.content { padding: 28px 36px 120px; max-width: 820px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.today-header {
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: #555; margin-bottom: 16px; font-weight: 600;
+}
+.picks-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid #1a1a1a; }
+.pick-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: #161616; border: 1px solid #252525;
+  border-radius: 20px; padding: 5px 12px; font-size: 13px;
+}
+.pick-chip.starred { background: #1c1608; border-color: #f5a62333; color: #f5c842; }
+.pick-chip.maybe   { background: #141420; border-color: #6366f133; color: #818cf8; }
+.pick-chip .chip-dot { width: 6px; height: 6px; border-radius: 50%; }
+.pick-chip.starred .chip-dot { background: #f5a623; }
+.pick-chip.maybe   .chip-dot { background: #6366f1; }
+
+.name-card {
+  display: flex; align-items: stretch;
+  background: #111; border: 1px solid #1e1e1e;
+  border-radius: 10px; margin-bottom: 8px; overflow: hidden; transition: all .2s;
+}
+.name-card:hover { border-color: #2a2a2a; background: #141414; }
+.name-card.is-starred { border-color: #f5a62333; background: #18150a; }
+.name-card.is-maybe   { border-color: #6366f122; background: #111128; }
+.name-card.is-rejected { opacity: .28; }
+.name-card.is-rejected .name-label { text-decoration: line-through; }
+
+.card-status { width: 4px; flex-shrink: 0; background: transparent; transition: background .2s; }
+.name-card.is-starred .card-status { background: #f5a623; }
+.name-card.is-maybe   .card-status { background: #6366f1; }
+.name-card.is-rejected .card-status { background: #333; }
+
+.card-body { flex: 1; padding: 14px 16px; min-width: 0; }
+.name-label { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; color: #f0f0f0; }
+.name-vibe  { font-size: 13px; color: #666; margin-top: 3px; line-height: 1.4; }
+.name-note  { margin-top: 6px; font-size: 12px; color: #9580c0; font-style: italic; display: flex; align-items: flex-start; gap: 5px; }
+.name-note::before { content: '↳'; color: #555; flex-shrink: 0; }
+.note-toggle {
+  background: none; border: none; color: #444; font-size: 12px;
+  cursor: pointer; font-family: inherit; margin-top: 6px; display: block; padding: 2px 0;
+}
+.note-toggle:hover { color: #777; }
+.note-input {
+  width: 100%; margin-top: 6px; background: #0c0c0c; border: 1px solid #252525;
+  border-radius: 6px; padding: 8px 10px; color: #ccc; font-size: 13px;
+  font-family: inherit; resize: none; outline: none;
+}
+.note-input:focus { border-color: #444; }
+
+.card-actions {
+  display: flex; align-items: center; gap: 2px; padding: 0 12px; flex-shrink: 0;
+}
+.action-btn {
+  width: 32px; height: 32px; border-radius: 8px; border: none;
+  background: none; cursor: pointer; font-size: 15px; display: flex;
+  align-items: center; justify-content: center; transition: all .12s; color: #3a3a3a;
+}
+.action-btn:hover { background: #1e1e1e; color: #888; }
+.action-btn.s-on { color: #f5a623; }
+.action-btn.m-on { color: #6366f1; }
+.action-btn.r-on { color: #555; }
+
+.keepers-section { margin-bottom: 36px; }
+.keepers-label {
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: #555; font-weight: 600; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.keepers-label span { font-size: 14px; }
+.empty-state {
+  background: #111; border: 1px dashed #222; border-radius: 10px;
+  padding: 28px; text-align: center; color: #444; font-size: 14px;
+}
+
+.archive-filter { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.af-btn {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid #222;
+  background: none; color: #666; font-size: 12px; font-family: inherit; cursor: pointer; transition: all .12s;
+}
+.af-btn:hover { border-color: #444; color: #aaa; }
+.af-btn.active { background: #1e1e1e; border-color: #444; color: #ddd; }
+.batch-label {
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #444;
+  font-weight: 600; margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #161616;
+}
+.batch-label:first-child { margin-top: 4px; }
+
+.notes-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 300;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.notes-overlay.open { opacity: 1; pointer-events: all; }
+.notes-panel {
+  position: fixed; bottom: 0; left: 0; right: 0; background: #111;
+  border-top: 1px solid #2a2a2a; border-radius: 20px 20px 0 0; z-index: 400;
+  transform: translateY(100%); transition: transform .25s cubic-bezier(.4,0,.2,1);
+  max-height: 85vh; display: flex; flex-direction: column;
+}
+.notes-panel.open { transform: translateY(0); }
+.notes-handle { width: 36px; height: 4px; background: #333; border-radius: 2px; margin: 14px auto 0; flex-shrink: 0; }
+.notes-header {
+  padding: 16px 28px 12px; border-bottom: 1px solid #1e1e1e;
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.notes-title { font-size: 15px; font-weight: 700; color: #f0f0f0; }
+.notes-close {
+  background: #1e1e1e; border: none; color: #888; width: 28px; height: 28px;
+  border-radius: 6px; font-size: 16px; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+}
+.notes-close:hover { background: #2a2a2a; color: #ccc; }
+.notes-body { overflow-y: auto; padding: 20px 28px 32px; flex: 1; }
+.notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .notes-grid { grid-template-columns: 1fr; } }
+.note-field { display: flex; flex-direction: column; gap: 6px; }
+.note-field.full { grid-column: 1 / -1; }
+.note-field label { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: #555; font-weight: 600; }
+.note-field textarea {
+  background: #0c0c0c; border: 1px solid #1e1e1e; border-radius: 8px;
+  padding: 10px 12px; color: #ccc; font-size: 13px; font-family: inherit;
+  resize: vertical; outline: none; line-height: 1.6; transition: border-color .15s;
+}
+.note-field textarea:focus { border-color: #333; }
+.note-field .note-hint { font-size: 11px; color: #444; }
+.notes-actions {
+  display: flex; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #1a1a1a;
+}
+.notes-btn {
+  padding: 9px 20px; border-radius: 8px; border: 1px solid #2a2a2a;
+  background: #161616; color: #ccc; font-size: 13px; font-family: inherit; cursor: pointer; transition: all .15s;
+}
+.notes-btn:hover { background: #1e1e1e; border-color: #444; }
+.notes-btn.primary { background: linear-gradient(135deg, #f0c27f, #e8855a); color: #000; border: none; font-weight: 600; }
+.notes-btn.primary:hover { opacity: .9; }
+
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; background: #0c0c0c;
+  border-top: 1px solid #1a1a1a; padding: 12px 36px;
+  display: flex; gap: 10px; align-items: center; z-index: 100;
+}
+.stat-chips { display: flex; gap: 8px; }
+.stat-chip { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #141414; border: 1px solid #1e1e1e; }
+.stat-chip.s { color: #f5a623; }
+.stat-chip.m { color: #6366f1; }
+.stat-chip.r { color: #555; }
+.bottom-right { margin-left: auto; display: flex; gap: 8px; }
+.export-btn {
+  padding: 8px 18px; border-radius: 8px; border: 1px solid #2a2a2a;
+  background: #161616; color: #bbb; font-size: 13px; font-family: inherit; cursor: pointer; transition: all .15s;
+}
+.export-btn:hover { background: #1e1e1e; color: #fff; border-color: #444; }
+.export-btn.primary { background: linear-gradient(135deg, #f0c27f, #e8855a); color: #000; border: none; font-weight: 600; }
+.export-btn.primary:hover { opacity: .9; }
+
+@media (max-width: 600px) {
+  .header, .content, .bottom-bar { padding-left: 16px; padding-right: 16px; }
+  .name-label { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="title">Group Name Ideas</div>
+    <div class="header-actions">
+      <div class="live-dot offline" id="liveDot" title="Connecting..."></div>
+      <button class="header-btn" id="notesBtn" onclick="toggleNotes()">✦ Direction Notes</button>
+    </div>
+  </div>
+  <div class="tabs" id="tabBar">
+    <button class="tab active" data-tab="today">Today <span class="badge" id="todayBadge"></span></button>
+    <button class="tab" data-tab="keepers">Keepers <span class="badge" id="keepersBadge"></span></button>
+    <button class="tab" data-tab="archive">Archive <span class="badge" id="archiveBadge"></span></button>
+  </div>
+</div>
+
+<div class="content">
+  <div class="tab-panel active" id="panel-today">
+    <div class="today-header">Your current picks</div>
+    <div class="picks-strip" id="picksStrip"></div>
+    <div class="today-header" id="todayBatchLabel"></div>
+    <div id="todayCards"></div>
+  </div>
+  <div class="tab-panel" id="panel-keepers">
+    <div class="keepers-section">
+      <div class="keepers-label"><span>⭐</span> Starred</div>
+      <div id="starredCards"></div>
+    </div>
+    <div class="keepers-section">
+      <div class="keepers-label"><span>🤔</span> Maybe</div>
+      <div id="maybeCards"></div>
+    </div>
+  </div>
+  <div class="tab-panel" id="panel-archive">
+    <div class="archive-filter" id="archiveFilter">
+      <button class="af-btn active" data-af="all">All</button>
+      <button class="af-btn" data-af="unreviewed">Unreviewed</button>
+      <button class="af-btn" data-af="starred">Starred</button>
+      <button class="af-btn" data-af="maybe">Maybe</button>
+      <button class="af-btn" data-af="rejected">Rejected</button>
+    </div>
+    <div id="archiveCards"></div>
+  </div>
+</div>
+
+<div class="notes-overlay" id="notesOverlay" onclick="closeNotes()"></div>
+<div class="notes-panel" id="notesPanel">
+  <div class="notes-handle"></div>
+  <div class="notes-header">
+    <div class="notes-title">Direction Notes</div>
+    <button class="notes-close" onclick="closeNotes()">×</button>
+  </div>
+  <div class="notes-body">
+    <div class="notes-grid">
+      <div class="note-field">
+        <label>What's Clicking</label>
+        <textarea id="n-clicking" rows="7" placeholder="What patterns and names feel right..."></textarea>
+        <div class="note-hint">Vibes, patterns, names that are close</div>
+      </div>
+      <div class="note-field">
+        <label>What to Avoid</label>
+        <textarea id="n-avoid" rows="7" placeholder="Hard no's — patterns, sounds, concepts..."></textarea>
+        <div class="note-hint">Definite no-gos for the daily task</div>
+      </div>
+      <div class="note-field">
+        <label>Explore Next</label>
+        <textarea id="n-explore" rows="6" placeholder="Directions and themes to try tomorrow..."></textarea>
+        <div class="note-hint">Specific asks for the next batch</div>
+      </div>
+      <div class="note-field">
+        <label>References & Inspiration</label>
+        <textarea id="n-refs" rows="6" placeholder="Artists, movies, places, words that capture the vibe..."></textarea>
+        <div class="note-hint">Cultural touchpoints, aesthetic references</div>
+      </div>
+      <div class="note-field full">
+        <label>General Notes</label>
+        <textarea id="n-general" rows="4" placeholder="Anything else — context, thoughts, random ideas, group updates..."></textarea>
+        <div class="note-hint">Freeform — anything useful for future batches. Changes here sync to everyone.</div>
+      </div>
+    </div>
+    <div class="notes-actions">
+      <button class="notes-btn primary" onclick="exportNotes()">Copy Notes for Export</button>
+      <button class="notes-btn" onclick="saveAndCloseNotes()">Save & Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="stat-chips">
+    <div class="stat-chip s" id="statStarred">⭐ 0</div>
+    <div class="stat-chip m" id="statMaybe">🤔 0</div>
+    <div class="stat-chip r" id="statRejected">✕ 0</div>
+  </div>
+  <div class="bottom-right">
+    <button class="export-btn" onclick="exportAll()">Export Summary</button>
+    <button class="export-btn primary" onclick="exportFavorites()">Copy Picks</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, set, update, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getAnalytics }                           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js';
+
+// ─────────────────────────────────────────────
+// FIREBASE
+// ─────────────────────────────────────────────
+const app = initializeApp({
+  apiKey:            "AIzaSyBOk_REfgJxLTUhUq54T_fOMtRM8vSFLXg",
+  authDomain:        "group-name-ideas.firebaseapp.com",
+  databaseURL:       "https://group-name-ideas-default-rtdb.firebaseio.com",
+  projectId:         "group-name-ideas",
+  storageBucket:     "group-name-ideas.firebasestorage.app",
+  messagingSenderId: "426168159310",
+  appId:             "1:426168159310:web:f8aa86e0df0e1e4371871f",
+  measurementId:     "G-6G0VK85HRX"
+});
+const db = getDatabase(app);
+try { getAnalytics(app); } catch(_) {}
+
+// ─────────────────────────────────────────────
+// BATCHES — all name data
+// Scheduled task appends new objects to end of this array
+// ─────────────────────────────────────────────
+const BATCHES = [
+  {
+    id:"b1", date:"March 28", label:"Batch 1 — Italian",
+    names:[
+      {id:"volta",      name:"VOLTA",      vibe:'Short for Volturara — electric energy, a "turn" in Italian'},
+      {id:"tre-fuochi", name:"Tre Fuochi",  vibe:'"Three Fires" — brotherhood, Italian heat'},
+      {id:"lupo",       name:"LUPO",        vibe:'"Wolf" — pack mentality, street energy'},
+      {id:"sfizio",     name:"Sfizio",      vibe:'Italian for "a little indulgence/craving" — smooth, R&B-coded'},
+      {id:"brac3",      name:"BRAC3",       vibe:'"Braci" (embers) with leet-speak 3'},
+      {id:"fuori",      name:"Fuori",       vibe:'"Outside/outsiders" — diaspora energy'},
+      {id:"vicolo",     name:"Vicolo",      vibe:'"Alley" — Irpinia streets meet NYC block culture'},
+      {id:"3-ponti",    name:"3 Ponti",     vibe:'"3 Bridges" — connecting Italy and NY'},
+      {id:"sangue",     name:"Sangue",      vibe:'"Blood" — family ties, raw one-word power'},
+      {id:"radici",     name:"RADICI",      vibe:'"Roots" — heritage-forward'},
+      {id:"covo",       name:"Covo",        vibe:'"Den/hideout" — underground feel'},
+      {id:"onda",       name:"Onda",        vibe:'"Wave" — smooth, musical'},
+      {id:"vespr",      name:"VESPR",       vibe:'Shortened "Vespri" (vespers/evening) — moody, cinematic'},
+      {id:"terroni",    name:"Terroni",     vibe:'Reclaiming the southern Italian slang — bold'},
+      {id:"filo",       name:"Filo",        vibe:'"Thread" — connection between worlds'},
+      {id:"draghi",     name:"DRAGHÌ",      vibe:'"Dragons" — Irpinia lore meets hip-hop swagger'},
+      {id:"cerchio",    name:"Cerchio",     vibe:'"Circle" — crew unity'},
+      {id:"branco",     name:"Branco",      vibe:'"Pack" — group energy, street-ready'},
+    ]
+  },
+  {
+    id:"b2", date:"March 28", label:"Batch 2 — English (verified available on streaming)",
+    names:[
+      {id:"gold-sons",   name:"Gold Sons",   vibe:'Heritage pride, hip-hop polish'},
+      {id:"first-sons",  name:"First Sons",  vibe:'Legacy, eldest-generation-in-America energy'},
+      {id:"two-shores",  name:"Two Shores",  vibe:'Two homelands — NY and Italy'},
+      {id:"two-coasts",  name:"Two Coasts",  vibe:'Dual identity, diaspora life'},
+      {id:"ember-kings", name:"Ember Kings", vibe:'Fire imagery, regal crew energy'},
+      {id:"cold-kings",  name:"Cold Kings",  vibe:'Icy confidence, hip-hop swagger'},
+      {id:"brick-sons",  name:"Brick Sons",  vibe:'NYC brick buildings meet family lineage'},
+      {id:"south-root",  name:"South Root",  vibe:'Southern Italian roots + grounded identity'},
+      {id:"split-root",  name:"Split Root",  vibe:'Dual roots, growing in two places'},
+      {id:"fire-sons",   name:"Fire Sons",   vibe:'Heat, passion, brotherhood'},
+      {id:"burnt-gold",  name:"Burnt Gold",  vibe:'Refined through fire, valuable'},
+      {id:"storm-ridge", name:"Storm Ridge", vibe:'Power, elevation, dramatic'},
+      {id:"gold-ridge",  name:"Gold Ridge",  vibe:'Elevated, premium feel'},
+      {id:"twice-home",  name:"Twice Home",  vibe:'Two homes, dual belonging'},
+      {id:"storm-sons",  name:"Storm Sons",  vibe:'Force of nature + brotherhood'},
+    ]
+  },
+  {
+    id:"b3", date:"March 29", label:"Batch 3",
+    names:[
+      {id:"born-twice",   name:"Born Twice",   vibe:'Born into two cultures — diaspora in two words'},
+      {id:"loud-saints",  name:"Loud Saints",  vibe:'Patron saint festivals meet hip-hop volume'},
+      {id:"the-heirs",    name:"The Heirs",    vibe:'Legacy energy — inheriting something powerful'},
+      {id:"dark-vine",    name:"Dark Vine",    vibe:'Italian wine country roots, moody indie-R&B'},
+      {id:"ash-kings",    name:"Ash Kings",    vibe:'Forged through fire, still standing'},
+      {id:"new-kin",      name:"New Kin",      vibe:'Fresh generation, chosen family'},
+      {id:"stone-hymn",   name:"Stone Hymn",   vibe:'Sacred and hard, like a church carved from rock'},
+      {id:"the-cugz",     name:"The Cugz",     vibe:'Slang for "cugini" (cousins) — insider Italian-American'},
+      {id:"bloc3",        name:"BLOC3",        vibe:'Block culture with stylized 3 — street energy'},
+      {id:"ghost-feast",  name:"Ghost Feast",  vibe:'Sunday dinner with the ancestors'},
+      {id:"red-sons",     name:"Red Sons",     vibe:'Passion, blood, brotherhood'},
+      {id:"old-flame",    name:"Old Flame",    vibe:'Past-life fire, nostalgia, warmth'},
+      {id:"iron-hymn",    name:"Iron Hymn",    vibe:'Tough exterior, soulful core'},
+      {id:"the-compari",  name:"The Compari",  vibe:'"The godfathers/buddies" — insider Italian crew'},
+      {id:"night-forge",  name:"Night Forge",  vibe:'Creating something in the dark — moody'},
+      {id:"wolf-sons",    name:"Wolf Sons",    vibe:'Pack mentality + lineage'},
+      {id:"rough-grace",  name:"Rough Grace",  vibe:'Street grit meets Sunday mass elegance'},
+      {id:"volt3",        name:"VOLT3",        vibe:'Volturara + voltage — electric, stylized'},
+    ]
+  },
+  {
+    id:"b4", date:"March 30", label:"Batch 4",
+    names:[
+      {id:"pane",         name:"Pane",         vibe:'Italian for "bread" — breaking bread, daily grind'},
+      {id:"third-coast",  name:"Third Coast",  vibe:'A third coast — diaspora as its own place'},
+      {id:"brass-sons",   name:"Brass Sons",   vibe:'Italian band tradition meets hip-hop horns'},
+      {id:"the-vigil",    name:"The Vigil",    vibe:'Staying alert — candlelit processions meet late-night sessions'},
+      {id:"wild-grace",   name:"Wild Grace",   vibe:'Untamed but elegant — street energy plus Sunday best'},
+      {id:"stonn3",       name:"Stonn3",       vibe:'Stoned/stunned + Irpinian dialect "stonne"'},
+      {id:"blood-hymn",   name:"Blood Hymn",   vibe:'Sacred and raw — family loyalty sung loud'},
+      {id:"feast-day",    name:"Feast Day",    vibe:"Saint's feast + celebrating life"},
+      {id:"crown-sons",   name:"Crown Sons",   vibe:'Kings in the making, inherited pride'},
+      {id:"the-parish",   name:"The Parish",   vibe:'Neighborhood, belonging, Italian church roots'},
+      {id:"stone-kin",    name:"Stone Kin",    vibe:'Hard outside, family inside'},
+      {id:"notte",        name:"NOTTE",        vibe:'Italian for "night" — moody, two syllables, universal'},
+      {id:"half-blood",   name:"Half Blood",   vibe:'Mixed identity, two worlds in the veins'},
+      {id:"gold-smoke",   name:"Gold Smoke",   vibe:'Luxury meets haze — atmospheric R&B'},
+      {id:"the-vow",      name:"The Vow",      vibe:'Commitment, sacred promise — cinematic weight'},
+      {id:"salt-sons",    name:"Salt Sons",    vibe:'Salt of the earth + the sea between two lands'},
+      {id:"brisk-pack",   name:"Brisk Pack",   vibe:'Cold NYC energy, tight crew'},
+      {id:"deep-root",    name:"Deep Root",    vibe:'Grounded, heritage-first, genre-flexible'},
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────
+// BAKED STATE — last known reviews (March 30, 2026)
+// Firebase overrides these on load; new names default to "unreviewed"
+// ─────────────────────────────────────────────
+const BAKED_STATE = {
+  "volta":       {status:"maybe"},
+  "tre-fuochi":  {status:"rejected"},
+  "lupo":        {status:"maybe",    note:"Lupi — if anything for plural version as group name"},
+  "sfizio":      {status:"maybe"},
+  "brac3":       {status:"rejected"},
+  "fuori":       {status:"rejected"},
+  "vicolo":      {status:"rejected"},
+  "3-ponti":     {status:"rejected"},
+  "sangue":      {status:"rejected"},
+  "radici":      {status:"rejected"},
+  "covo":        {status:"rejected"},
+  "onda":        {status:"rejected"},
+  "vespr":       {status:"rejected"},
+  "terroni":     {status:"rejected"},
+  "filo":        {status:"rejected"},
+  "draghi":      {status:"starred"},
+  "cerchio":     {status:"rejected"},
+  "branco":      {status:"rejected"},
+  "gold-sons":   {status:"rejected"},
+  "first-sons":  {status:"rejected"},
+  "two-shores":  {status:"rejected"},
+  "two-coasts":  {status:"rejected"},
+  "ember-kings": {status:"rejected"},
+  "cold-kings":  {status:"rejected"},
+  "brick-sons":  {status:"rejected"},
+  "south-root":  {status:"rejected"},
+  "split-root":  {status:"rejected"},
+  "fire-sons":   {status:"rejected"},
+  "burnt-gold":  {status:"rejected"},
+  "storm-ridge": {status:"rejected"},
+  "gold-ridge":  {status:"rejected"},
+  "twice-home":  {status:"rejected"},
+  "storm-sons":  {status:"rejected"},
+  "born-twice":  {status:"rejected"},
+  "loud-saints": {status:"rejected"},
+  "the-heirs":   {status:"rejected"},
+  "dark-vine":   {status:"rejected"},
+  "ash-kings":   {status:"rejected"},
+  "new-kin":     {status:"rejected"},
+  "stone-hymn":  {status:"rejected"},
+  "the-cugz":    {status:"maybe",    note:"The Cugi's — interesting idea"},
+  "bloc3":       {status:"rejected"},
+  "ghost-feast": {status:"rejected"},
+  "red-sons":    {status:"rejected"},
+  "old-flame":   {status:"rejected"},
+  "iron-hymn":   {status:"rejected"},
+  "the-compari": {status:"maybe"},
+  "night-forge": {status:"rejected"},
+  "wolf-sons":   {status:"rejected"},
+  "rough-grace": {status:"rejected"},
+  "volt3":       {status:"rejected"},
+  "pane":        {status:"rejected"},
+  "third-coast": {status:"maybe"},
+  "brass-sons":  {status:"rejected"},
+  "the-vigil":   {status:"rejected"},
+  "wild-grace":  {status:"rejected"},
+  "stonn3":      {status:"rejected"},
+  "blood-hymn":  {status:"rejected"},
+  "feast-day":   {status:"rejected"},
+  "crown-sons":  {status:"rejected"},
+  "the-parish":  {status:"rejected"},
+  "stone-kin":   {status:"rejected"},
+  "notte":       {status:"maybe"},
+  "half-blood":  {status:"rejected"},
+  "gold-smoke":  {status:"rejected"},
+  "the-vow":     {status:"rejected"},
+  "salt-sons":   {status:"rejected"},
+  "brisk-pack":  {status:"rejected"},
+  "deep-root":   {status:"rejected"},
+};
+
+// ─────────────────────────────────────────────
+// DIRECTION NOTES DEFAULTS — updated March 30, 2026
+// ─────────────────────────────────────────────
+const NOTES_DEFAULTS = {
+  clicking:`- DRAGHÌ (starred): Italian mythological creature names hit hard — short, mysterious, confident
+- LUPO → Lupi: Italian animal names work, especially in plural form
+- Sfizio, NOTTE: evocative Italian nouns — cool-sounding, not over-explained
+- The Cugz / The Compari: insider Italian-American social language
+- Third Coast: diaspora-as-its-own-place concept works in English when big and conceptual`,
+  avoid:`- [Word] Sons / [Word] Kings patterns — every single one rejected
+- Literal Italian heritage words (Sangue=Blood, Radici=Roots, Filo=Thread)
+- Leet-speak stylized spellings (BRAC3, VOLT3, BLOC3)
+- English compound nature/place words (Storm Ridge, Gold Smoke, Split Root)
+- Descriptive English pairs in general (Rough Grace, Wild Grace, etc.)`,
+  explore:`- Italian dialect words from Campania / Irpinia (not textbook Italian)
+- More Italian plural creature/animal names: Lupi, Aquile, Falchi, Serpi, Corvi...
+- "I + [Italian plural noun]" constructions — how groups name themselves in Italian
+- Italian words for darkness, mystery, night — NOTTE direction
+- Single raw Italian nouns that sound great in English-speaking mouths
+- Italian mythological names — continue the DRAGHÌ direction`,
+  refs:`- DRAGHÌ is the north star — names in that spirit
+- What would it look like on a venue marquee in NYC?
+- Italian-American identity without being ABOUT it — it should just BE it`,
+  general:``
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let reviews      = { ...BAKED_STATE };
+let notes        = { ...NOTES_DEFAULTS };
+let archiveFilter = 'all';
+let notesOpen     = false;
+
+function getStatus(id) { return reviews[id]?.status || 'unreviewed'; }
+function getNote(id)   { return reviews[id]?.note   || ''; }
+
+// ─────────────────────────────────────────────
+// FIREBASE WRITES
+// ─────────────────────────────────────────────
+function writeReview(id, changes) {
+  update(ref(db, 'reviews/' + id), changes);
+}
+function writeNotes(n) {
+  set(ref(db, 'notes'), n);
+}
+
+// Seed Firebase on very first load
+get(ref(db, 'reviews')).then(snap => {
+  if (!snap.exists()) set(ref(db, 'reviews'), BAKED_STATE);
+});
+
+// Real-time listener — syncs all clients
+onValue(ref(db, '/'), snapshot => {
+  const data = snapshot.val() || {};
+  reviews = { ...BAKED_STATE, ...(data.reviews || {}) };
+
+  const active = document.activeElement;
+  const typing = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT');
+  if (!typing) {
+    notes = { ...NOTES_DEFAULTS, ...(data.notes || {}) };
+    if (notesOpen) loadNotesIntoPanel();
+  }
+
+  document.getElementById('liveDot').classList.remove('offline');
+  render();
+});
+
+// ─────────────────────────────────────────────
+// ACTIONS
+// ─────────────────────────────────────────────
+function setStatus(id, newStatus) {
+  const cur  = getStatus(id);
+  const next = cur === newStatus ? 'unreviewed' : newStatus;
+  writeReview(id, { status: next });
+}
+function setNameNote(id, val) {
+  writeReview(id, { note: val });
+}
+
+// ─────────────────────────────────────────────
+// CARDS
+// ─────────────────────────────────────────────
+function makeCard(n) {
+  const status   = getStatus(n.id);
+  const nameNote = getNote(n.id);
+
+  const card = document.createElement('div');
+  card.className = 'name-card' +
+    (status === 'starred'  ? ' is-starred'  : '') +
+    (status === 'maybe'    ? ' is-maybe'    : '') +
+    (status === 'rejected' ? ' is-rejected' : '');
+
+  const bar = document.createElement('div');
+  bar.className = 'card-status';
+  card.appendChild(bar);
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'name-label';
+  nameEl.textContent = n.name;
+  body.appendChild(nameEl);
+
+  const vibeEl = document.createElement('div');
+  vibeEl.className = 'name-vibe';
+  vibeEl.textContent = n.vibe;
+  body.appendChild(vibeEl);
+
+  if (nameNote) {
+    const noteEl = document.createElement('div');
+    noteEl.className = 'name-note';
+    noteEl.textContent = nameNote;
+    body.appendChild(noteEl);
+  }
+
+  const noteArea = document.createElement('div');
+  const tog = document.createElement('button');
+  tog.className = 'note-toggle';
+  tog.textContent = nameNote ? 'edit note' : '+ add note';
+  tog.onclick = () => {
+    noteArea.innerHTML = '';
+    const ta = document.createElement('textarea');
+    ta.className = 'note-input';
+    ta.rows = 2;
+    ta.placeholder = 'Your thoughts...';
+    ta.value = getNote(n.id);
+    ta.onblur = () => { setNameNote(n.id, ta.value); };
+    ta.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ta.blur(); } };
+    noteArea.appendChild(ta);
+    setTimeout(() => ta.focus(), 0);
+  };
+  noteArea.appendChild(tog);
+  body.appendChild(noteArea);
+  card.appendChild(body);
+
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+  const mkBtn = (emoji, cls, s) => {
+    const b = document.createElement('button');
+    b.className = 'action-btn' + (status === s ? ' ' + cls : '');
+    b.textContent = emoji;
+    b.title = s;
+    b.onclick = () => setStatus(n.id, s);
+    return b;
+  };
+  actions.appendChild(mkBtn('★', 's-on', 'starred'));
+  actions.appendChild(mkBtn('?', 'm-on', 'maybe'));
+  actions.appendChild(mkBtn('✕', 'r-on', 'rejected'));
+  card.appendChild(actions);
+
+  return card;
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function render() {
+  const allNames = BATCHES.flatMap(b => b.names);
+  const starred  = allNames.filter(n => getStatus(n.id) === 'starred');
+  const maybe    = allNames.filter(n => getStatus(n.id) === 'maybe');
+  const rejected = allNames.filter(n => getStatus(n.id) === 'rejected');
+
+  document.getElementById('statStarred').textContent = `⭐ ${starred.length}`;
+  document.getElementById('statMaybe').textContent   = `🤔 ${maybe.length}`;
+  document.getElementById('statRejected').textContent = `✕ ${rejected.length}`;
+
+  const latest = BATCHES[BATCHES.length - 1];
+  const newInLatest = latest.names.filter(n => getStatus(n.id) === 'unreviewed').length;
+  document.getElementById('todayBadge').textContent    = newInLatest > 0 ? newInLatest + ' new' : 'done';
+  document.getElementById('keepersBadge').textContent  = starred.length + maybe.length;
+  document.getElementById('archiveBadge').textContent  = allNames.length;
+
+  renderToday(starred, maybe, latest);
+  renderKeepers(starred, maybe);
+  renderArchive(archiveFilter);
+}
+
+function renderToday(starred, maybe, latest) {
+  const strip = document.getElementById('picksStrip');
+  strip.innerHTML = '';
+  [...starred, ...maybe].forEach(n => {
+    const s = getStatus(n.id);
+    const chip = document.createElement('div');
+    chip.className = 'pick-chip ' + s;
+    chip.innerHTML = `<div class="chip-dot"></div><span>${n.name}</span>`;
+    strip.appendChild(chip);
+  });
+  if (!starred.length && !maybe.length) {
+    strip.innerHTML = '<div style="font-size:13px;color:#444">No picks yet — star or maybe names below</div>';
+  }
+
+  document.getElementById('todayBatchLabel').textContent = `${latest.date} — ${latest.label}`;
+
+  const container = document.getElementById('todayCards');
+  container.innerHTML = '';
+  const visible = latest.names.filter(n => getStatus(n.id) !== 'rejected');
+  const unrev   = visible.filter(n => getStatus(n.id) === 'unreviewed');
+  const reviewed = visible.filter(n => getStatus(n.id) !== 'unreviewed');
+  [...unrev, ...reviewed].forEach(n => container.appendChild(makeCard(n)));
+  if (!visible.length) {
+    container.innerHTML = '<div class="empty-state">All names in this batch reviewed.<br>Check back tomorrow for a new batch.</div>';
+  }
+}
+
+function renderKeepers(starred, maybe) {
+  const sc = document.getElementById('starredCards');
+  const mc = document.getElementById('maybeCards');
+  sc.innerHTML = '';
+  mc.innerHTML = '';
+  if (!starred.length) sc.innerHTML = '<div class="empty-state">No starred names yet</div>';
+  else starred.forEach(n => sc.appendChild(makeCard(n)));
+  if (!maybe.length)  mc.innerHTML = '<div class="empty-state">No maybe names yet</div>';
+  else maybe.forEach(n => mc.appendChild(makeCard(n)));
+}
+
+function renderArchive(filter) {
+  const container = document.getElementById('archiveCards');
+  container.innerHTML = '';
+  BATCHES.forEach(batch => {
+    const toShow = batch.names.filter(n => filter === 'all' || getStatus(n.id) === filter);
+    if (!toShow.length) return;
+    const label = document.createElement('div');
+    label.className = 'batch-label';
+    label.textContent = `${batch.date} — ${batch.label}`;
+    container.appendChild(label);
+    toShow.forEach(n => container.appendChild(makeCard(n)));
+  });
+  if (!container.children.length) {
+    container.innerHTML = '<div class="empty-state">No names match this filter</div>';
+  }
+}
+
+// ─────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────
+document.getElementById('tabBar').addEventListener('click', e => {
+  const btn = e.target.closest('.tab');
+  if (!btn) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+});
+
+document.getElementById('archiveFilter').addEventListener('click', e => {
+  const btn = e.target.closest('.af-btn');
+  if (!btn) return;
+  document.querySelectorAll('.af-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  archiveFilter = btn.dataset.af;
+  renderArchive(archiveFilter);
+});
+
+// ─────────────────────────────────────────────
+// NOTES PANEL
+// ─────────────────────────────────────────────
+function toggleNotes()  { notesOpen ? closeNotes() : openNotes(); }
+function openNotes() {
+  loadNotesIntoPanel();
+  notesOpen = true;
+  document.getElementById('notesPanel').classList.add('open');
+  document.getElementById('notesOverlay').classList.add('open');
+  document.getElementById('notesBtn').classList.add('notes-active');
+}
+function closeNotes() {
+  notesOpen = false;
+  document.getElementById('notesPanel').classList.remove('open');
+  document.getElementById('notesOverlay').classList.remove('open');
+  document.getElementById('notesBtn').classList.remove('notes-active');
+}
+function saveAndCloseNotes() {
+  const n = {
+    clicking: document.getElementById('n-clicking').value,
+    avoid:    document.getElementById('n-avoid').value,
+    explore:  document.getElementById('n-explore').value,
+    refs:     document.getElementById('n-refs').value,
+    general:  document.getElementById('n-general').value,
+  };
+  notes = n;
+  writeNotes(n);
+  closeNotes();
+}
+function loadNotesIntoPanel() {
+  document.getElementById('n-clicking').value = notes.clicking || NOTES_DEFAULTS.clicking;
+  document.getElementById('n-avoid').value    = notes.avoid    || NOTES_DEFAULTS.avoid;
+  document.getElementById('n-explore').value  = notes.explore  || NOTES_DEFAULTS.explore;
+  document.getElementById('n-refs').value     = notes.refs     || NOTES_DEFAULTS.refs;
+  document.getElementById('n-general').value  = notes.general  || '';
+}
+function exportNotes() {
+  const text = [
+    '=== DIRECTION NOTES ===',
+    '\n--- WHAT\'S CLICKING ---\n' + (notes.clicking || ''),
+    '\n--- WHAT TO AVOID ---\n'    + (notes.avoid    || ''),
+    '\n--- EXPLORE NEXT ---\n'     + (notes.explore  || ''),
+    '\n--- REFERENCES ---\n'       + (notes.refs     || ''),
+    notes.general ? '\n--- GENERAL NOTES ---\n' + notes.general : ''
+  ].join('\n');
+  navigator.clipboard.writeText(text).then(() => alert('Direction notes copied!'));
+}
+
+// ─────────────────────────────────────────────
+// EXPORT
+// ─────────────────────────────────────────────
+function exportFavorites() {
+  const all     = BATCHES.flatMap(b => b.names);
+  const starred = all.filter(n => getStatus(n.id) === 'starred');
+  const maybe   = all.filter(n => getStatus(n.id) === 'maybe');
+  if (!starred.length && !maybe.length) { alert('No picks yet!'); return; }
+  const fmt = n => `  • ${n.name}${getNote(n.id) ? ` — "${getNote(n.id)}"` : ''}`;
+  const text = ['⭐ STARRED:', ...starred.map(fmt), '\n🤔 MAYBE:', ...maybe.map(fmt)].join('\n');
+  navigator.clipboard.writeText(text).then(() => alert('Picks copied!'));
+}
+function exportAll() {
+  const all = BATCHES.flatMap(b => b.names);
+  const sec = (t, items) => items.length ? t + '\n' + items.map(n => `  • ${n.name}${getNote(n.id) ? ` — "${getNote(n.id)}"` : ''}`).join('\n') + '\n' : '';
+  const text = 'Group Name Review Summary\n' + '='.repeat(30) + '\n\n'
+    + sec('⭐ STARRED:',    all.filter(n => getStatus(n.id) === 'starred'))
+    + sec('\n🤔 MAYBE:',    all.filter(n => getStatus(n.id) === 'maybe'))
+    + sec('\n❌ REJECTED:', all.filter(n => getStatus(n.id) === 'rejected'))
+    + sec('\n⬜ UNREVIEWED:', all.filter(n => getStatus(n.id) === 'unreviewed'));
+  navigator.clipboard.writeText(text).then(() => alert('Full summary copied!'));
+}
+
+// ─────────────────────────────────────────────
+// EXPOSE to window for onclick handlers
+// ─────────────────────────────────────────────
+window.setStatus       = setStatus;
+window.setNameNote     = setNameNote;
+window.toggleNotes     = toggleNotes;
+window.closeNotes      = closeNotes;
+window.saveAndCloseNotes = saveAndCloseNotes;
+window.exportFavorites = exportFavorites;
+window.exportAll       = exportAll;
+window.exportNotes     = exportNotes;
+</script>
+</body>
+</html>
