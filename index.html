@@ -424,29 +424,9 @@ const BATCHES = [
       {id:"salt-sons",    name:"Salt Sons",    vibe:'Salt of the earth + the sea between two lands'},
       {id:"brisk-pack",   name:"Brisk Pack",   vibe:'Cold NYC energy, tight crew'},
       {id:"deep-root",    name:"Deep Root",    vibe:'Grounded, heritage-first, genre-flexible'},
-    ]
-  },
-  {
-    id:"b5", date:"March 31", label:"Batch 5",
-    names:[
-      {id:"lupi",        name:"LUPI",        vibe:'"Wolves" — plural pack name, two syllables, rolls off the tongue'},
-      {id:"corvi",       name:"CORVI",       vibe:'"Ravens/Crows" — dark, sharp, mythic flock energy'},
-      {id:"falchi",      name:"FALCHI",      vibe:'"Hawks" — predator instinct, Irpinian mountain birds'},
-      {id:"serpi",       name:"SERPI",       vibe:'"Serpents" — dangerous elegance, two syllables'},
-      {id:"gufi",        name:"GUFI",        vibe:'"Owls" — nocturnal wisdom, NOTTE-adjacent mood'},
-      {id:"orsi",        name:"ORSI",        vibe:'"Bears" — raw power, Southern Italian mountain creature'},
-      {id:"fumo",        name:"FUMO",        vibe:'"Smoke" — hazy, atmospheric, R&B-coded two syllables'},
-      {id:"ombra",       name:"OMBRA",       vibe:'"Shadow" — dark mystique, cinematic'},
-      {id:"ferro",       name:"FERRO",       vibe:'"Iron" — hard, elemental, two syllables that punch'},
-      {id:"grano",       name:"GRANO",       vibe:'"Wheat/grain" — Irpinian farmland roots, golden visual'},
-      {id:"scuro",       name:"SCURO",       vibe:'"Dark" — moody single-word statement, sounds great in English mouths'},
-      {id:"lampi",       name:"LAMPI",       vibe:'"Lightning bolts" — plural, electric, two syllables'},
-      {id:"sett3",       name:"I Tre",       vibe:'"The Three" — classic Italian group construction, minimalist'},
-      {id:"guappi",      name:"GUAPPI",      vibe:'Neapolitan for "tough guys/bosses" — dialect swagger'},
-      {id:"sturm",       name:"STURM",       vibe:'Campanian dialect for "storm" — raw, guttural, one syllable'},
-      {id:"zingari",     name:"Zingari",     vibe:'"Wanderers/gypsies" — reclaimed outsider energy, rolling sound'},
-      {id:"cenere",      name:"CENERE",      vibe:'"Ash" — volcanic Irpinia, what remains after fire'},
-      {id:"i-guappi",    name:"I Guappi",    vibe:'"The Bosses" in Neapolitan — Italian group construction + dialect'},
+      {id:"dragon-river", name:"Dragon River", vibe:'Mythological meets the river between two worlds'},
+      {id:"per-la-vita",  name:"Per La Vita",  vibe:'"For life" — loyalty, Italian street code, crew oath energy'},
+      {id:"marvento",     name:"Marvento",     vibe:'Irpinian dialect — evocative, local, sounds like its own thing'},
     ]
   }
 ];
@@ -525,6 +505,9 @@ const BAKED_STATE = {
   "salt-sons":   {status:"rejected"},
   "brisk-pack":  {status:"rejected"},
   "deep-root":   {status:"rejected"},
+  "dragon-river":{status:"maybe"},
+  "per-la-vita": {status:"maybe"},
+  "marvento":    {status:"maybe"},
 };
 
 // ─────────────────────────────────────────────
@@ -747,7 +730,7 @@ function renderKeepers(starred, maybe) {
 function renderArchive(filter) {
   const container = document.getElementById('archiveCards');
   container.innerHTML = '';
-  BATCHES.forEach(batch => {
+  [...BATCHES].reverse().forEach(batch => {
     const toShow = batch.names.filter(n => filter === 'all' || getStatus(n.id) === filter);
     if (!toShow.length) return;
     const label = document.createElement('div');
