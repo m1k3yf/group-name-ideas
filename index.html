@@ -15,8 +15,15 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0c0c0c; col
 .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .title {
   font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
-  background: linear-gradient(100deg, #f0c27f 0%, #e8855a 60%, #c94073 100%);
+  background: linear-gradient(100deg, #f0c27f, #e8855a, #c94073, #e8855a, #f0c27f);
+  background-size: 200% 100%;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: titleShimmer 6s ease infinite;
+}
+@keyframes titleShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 .header-actions { display: flex; gap: 10px; align-items: center; }
 .header-btn {
