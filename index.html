@@ -248,7 +248,7 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0c0c0c; col
   <div class="tab-panel" id="panel-archive">
     <div class="archive-filter" id="archiveFilter">
       <button class="af-btn active" data-af="all">All</button>
-      <button class="af-btn" data-af="unreviewed">Unreviewed</button>
+      <button class="af-btn" data-af="unreviewed">Unreviewed <span class="badge" id="unreviewedBadge"></span></button>
       <button class="af-btn" data-af="starred">Starred</button>
       <button class="af-btn" data-af="maybe">Maybe</button>
       <button class="af-btn" data-af="rejected">Rejected</button>
@@ -812,9 +812,12 @@ function render() {
   const maybe    = allNames.filter(n => getStatus(n.id) === 'maybe');
   const rejected = allNames.filter(n => getStatus(n.id) === 'rejected');
 
+  const unreviewed = allNames.filter(n => getStatus(n.id) === 'unreviewed');
+
   document.getElementById('statStarred').textContent = `⭐ ${starred.length}`;
   document.getElementById('statMaybe').textContent   = `🤔 ${maybe.length}`;
   document.getElementById('statRejected').textContent = `✕ ${rejected.length}`;
+  document.getElementById('unreviewedBadge').textContent = unreviewed.length > 0 ? unreviewed.length : '';
 
   const latest = BATCHES[BATCHES.length - 1];
   const newInLatest = latest.names.filter(n => getStatus(n.id) === 'unreviewed').length;
