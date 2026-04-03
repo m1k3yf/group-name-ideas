@@ -231,6 +231,7 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0c0c0c; col
   <div class="tabs" id="tabBar">
     <button class="tab active" data-tab="today">Today <span class="badge" id="todayBadge"></span></button>
     <button class="tab" data-tab="keepers">Keepers <span class="badge" id="keepersBadge"></span></button>
+    <button class="tab" data-tab="inreview">In Review <span class="badge" id="inreviewBadge"></span></button>
     <button class="tab" data-tab="archive">Archive <span class="badge" id="archiveBadge"></span></button>
   </div>
 </div>
@@ -252,10 +253,13 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0c0c0c; col
       <div id="maybeCards"></div>
     </div>
   </div>
+  <div class="tab-panel" id="panel-inreview">
+    <div class="today-header">Unreviewed names across all batches</div>
+    <div id="inreviewCards"></div>
+  </div>
   <div class="tab-panel" id="panel-archive">
     <div class="archive-filter" id="archiveFilter">
       <button class="af-btn active" data-af="all">All</button>
-      <button class="af-btn" data-af="unreviewed">Unreviewed <span class="badge" id="unreviewedBadge"></span></button>
       <button class="af-btn" data-af="starred">Starred <span class="badge" id="starredBadge"></span></button>
       <button class="af-btn" data-af="maybe">Maybe <span class="badge" id="maybeBadge"></span></button>
       <button class="af-btn" data-af="rejected">Rejected <span class="badge" id="rejectedBadge"></span></button>
@@ -847,7 +851,6 @@ function render() {
   document.getElementById('statStarred').textContent = `⭐ ${starred.length}`;
   document.getElementById('statMaybe').textContent   = `🤔 ${maybe.length}`;
   document.getElementById('statRejected').textContent = `✕ ${rejected.length}`;
-  document.getElementById('unreviewedBadge').textContent = unreviewed.length > 0 ? unreviewed.length : '';
   document.getElementById('starredBadge').textContent    = starred.length > 0 ? starred.length : '';
   document.getElementById('maybeBadge').textContent      = maybe.length > 0 ? maybe.length : '';
   document.getElementById('rejectedBadge').textContent   = rejected.length > 0 ? rejected.length : '';
@@ -856,10 +859,12 @@ function render() {
   const newInLatest = latest.names.filter(n => getStatus(n.id) === 'unreviewed').length;
   document.getElementById('todayBadge').textContent    = newInLatest > 0 ? newInLatest + ' new' : 'done';
   document.getElementById('keepersBadge').textContent  = starred.length + maybe.length;
+  document.getElementById('inreviewBadge').textContent = unreviewed.length > 0 ? unreviewed.length : '';
   document.getElementById('archiveBadge').textContent  = allNames.length;
 
   renderToday(starred, maybe, latest);
   renderKeepers(starred, maybe);
+  renderInReview(unreviewed);
   renderArchive(archiveFilter);
 }
 
@@ -899,6 +904,25 @@ function renderKeepers(starred, maybe) {
   else starred.forEach(n => sc.appendChild(makeCard(n)));
   if (!maybe.length)  mc.innerHTML = '<div class="empty-state">No maybe names yet</div>';
   else maybe.forEach(n => mc.appendChild(makeCard(n)));
+}
+
+function renderInReview(unreviewed) {
+  const container = document.getElementById('inreviewCards');
+  container.innerHTML = '';
+  if (!unreviewed.length) {
+    container.innerHTML = '<div class="empty-state">All caught up — every name has been reviewed.</div>';
+    return;
+  }
+  // Group unreviewed names by batch
+  [...BATCHES].reverse().forEach(batch => {
+    const batchUnreviewed = batch.names.filter(n => getStatus(n.id) === 'unreviewed');
+    if (!batchUnreviewed.length) return;
+    const label = document.createElement('div');
+    label.className = 'batch-label';
+    label.textContent = `${batch.date} — ${batch.label}`;
+    container.appendChild(label);
+    batchUnreviewed.forEach(n => container.appendChild(makeCard(n)));
+  });
 }
 
 function renderArchive(filter) {
