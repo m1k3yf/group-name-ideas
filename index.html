@@ -220,6 +220,55 @@ html[data-theme='light'] .pick-chip:hover { box-shadow: 0 14px 26px rgba(15,23,4
 .name-card.is-rejected .name-label { text-decoration: line-through; }
 html[data-theme='light'] .pick-chip.starred { background: #fff4d8; border-color: #f5a62355; color: #a36a00; }
 html[data-theme='light'] .pick-chip.maybe   { background: #eef0ff; border-color: #818cf855; color: #4f46e5; }
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(5,7,13,.68); backdrop-filter: blur(10px);
+  display: none; align-items: center; justify-content: center; padding: 18px; z-index: 90;
+}
+.modal-backdrop.open { display: flex; }
+.modal-panel {
+  width: min(760px, 100%); max-height: min(82vh, 900px); overflow: auto;
+  border: 1px solid var(--border); border-radius: 24px; background: var(--card);
+  box-shadow: 0 28px 70px rgba(0,0,0,.42); padding: 22px;
+}
+.modal-topbar { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.modal-kicker { color: var(--muted); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+.modal-title { font-size: clamp(28px, 4vw, 42px); line-height: 1; margin: 6px 0 10px; }
+.modal-subtitle { color: var(--muted); font-size: 14px; }
+.modal-close {
+  border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 999px;
+  min-width: 42px; height: 42px; font-size: 20px; cursor: pointer;
+}
+.modal-close:hover { transform: translateY(-1px); border-color: var(--border-soft); }
+.modal-badges { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 18px; }
+.modal-badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px;
+  border: 1px solid var(--border); background: rgba(255,255,255,.03); font-size: 12px; color: var(--muted);
+}
+.modal-badge strong { color: var(--text); font-size: 13px; }
+.modal-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 14px; }
+.modal-card {
+  border: 1px solid var(--border); border-radius: 18px; padding: 16px; background: rgba(255,255,255,.02);
+}
+.modal-card h4 { margin: 0 0 10px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.modal-card p { margin: 0; line-height: 1.6; }
+.modal-potential { display: grid; gap: 10px; }
+.potential-row {
+  display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 13px;
+}
+.potential-bar { flex: 1; height: 8px; border-radius: 999px; background: rgba(255,255,255,.06); overflow: hidden; }
+.potential-bar span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #f5a623, #e8855a); }
+.modal-note { margin-top: 14px; padding: 14px; border-radius: 16px; background: rgba(232,133,90,.08); border: 1px solid rgba(232,133,90,.22); }
+.modal-actions { display:flex; justify-content:flex-end; margin-top: 16px; }
+.modal-actions .btn { min-width: 140px; }
+html[data-theme='light'] .modal-backdrop { background: rgba(15,23,42,.34); }
+html[data-theme='light'] .modal-panel { box-shadow: 0 28px 70px rgba(15,23,42,.16); }
+html[data-theme='light'] .modal-card,
+html[data-theme='light'] .modal-badge { background: rgba(15,23,42,.03); }
+html[data-theme='light'] .potential-bar { background: rgba(15,23,42,.08); }
+@media (max-width: 760px) {
+  .modal-grid { grid-template-columns: 1fr; }
+  .modal-panel { padding: 18px; border-radius: 20px; }
+}
 html[data-theme='light'] .name-card.is-starred { background: #fff8ea; }
 html[data-theme='light'] .name-card.is-maybe   { background: #f3f2ff; }
 html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
@@ -461,6 +510,43 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
     <div class="notes-actions">
       <button class="notes-btn primary" onclick="exportNotes()">Copy Notes for Export</button>
       <button class="notes-btn" onclick="saveAndCloseNotes()">Save & Close</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-backdrop" id="pickModal" aria-hidden="true">
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="pickModalTitle">
+    <div class="modal-topbar">
+      <div>
+        <div class="modal-kicker">Current pick breakdown</div>
+        <div class="modal-title" id="pickModalTitle">Name</div>
+        <div class="modal-subtitle" id="pickModalSubtitle"></div>
+      </div>
+      <button class="modal-close" id="pickModalClose" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="modal-badges" id="pickModalBadges"></div>
+    <div class="modal-grid">
+      <div class="modal-card">
+        <h4>What this word is doing</h4>
+        <p id="pickModalVibe"></p>
+      </div>
+      <div class="modal-card">
+        <h4>Why it is a keeper</h4>
+        <p id="pickModalKeeper"></p>
+      </div>
+      <div class="modal-card">
+        <h4>Potential</h4>
+        <div class="modal-potential" id="pickModalPotential"></div>
+      </div>
+      <div class="modal-card">
+        <h4>Decision notes</h4>
+        <p id="pickModalNotes"></p>
+        <div class="modal-note" id="pickModalNextStep"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="pickModalDone" type="button">Close</button>
     </div>
   </div>
 </div>
@@ -974,6 +1060,7 @@ let draggingPickId = null;
 
 // Render baked-in data immediately so the UI is never blank if Firebase is slow or unavailable.
 render();
+initPickModal();
 
 function getStatus(id) { return reviews[id]?.status || 'unreviewed'; }
 function getNote(id)   { return reviews[id]?.note   || ''; }
@@ -1228,7 +1315,111 @@ function makeCard(n) {
 // ─────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────
+
+function getAllNames() {
+  return BATCHES.flatMap(b => b.names);
+}
+function findNameById(id) {
+  return getAllNames().find(n => n.id === id) || null;
+}
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function statusLabel(status) {
+  if (status === 'starred') return 'Starred';
+  if (status === 'maybe') return 'Maybe';
+  if (status === 'rejected') return 'Rejected';
+  return 'Unreviewed';
+}
+function inferOrigin(vibe) {
+  const token = (vibe || '').match(/^\[(.*?)\]/);
+  if (!token) return 'Mixed';
+  const map = { IT:'Italian-rooted', EN:'English-rooted', MIX:'Hybrid coin' };
+  return map[token[1]] || token[1];
+}
+function scoreNamePotential(nameObj) {
+  const vibe = (nameObj.vibe || '').toLowerCase();
+  const name = (nameObj.name || '');
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  let memorability = 62;
+  let brandability = 60;
+  let stretch = 58;
+  if (name.length <= 7) memorability += 14;
+  else if (name.length <= 10) memorability += 8;
+  if (words.length === 1) brandability += 10;
+  if (/[À-ÿ]/.test(name) || /[0-9]/.test(name)) memorability += 6;
+  if (/marquee|cinematic|electric|clean|punchy|hard|swagger|moody|premium|costs money/.test(vibe)) brandability += 12;
+  if (/two cultures|between two worlds|dual|diaspora|bilingual|hybrid|english|italian/.test(vibe)) stretch += 14;
+  if (/group|crew|brotherhood|pack|lineage|unity|proper group format/.test(vibe)) stretch += 8;
+  if (/underground|outsider|forbidden|dangerous|raw/.test(vibe)) memorability += 8;
+  const clamp = n => Math.max(45, Math.min(96, n));
+  return { memorability: clamp(memorability), brandability: clamp(brandability), stretch: clamp(stretch) };
+}
+function buildKeeperReason(nameObj, rank, status) {
+  const statusLead = status === 'starred'
+    ? 'It already cleared the highest bar, so this is not just interesting, it is surviving scrutiny.'
+    : 'It is still alive because it has enough tension and identity to deserve more testing.';
+  const frontRunner = rank === 0
+    ? 'Right now it is your front-runner, which means it is setting the tone for the whole shortlist.'
+    : rank > -1 ? `It is currently sitting at #${rank + 1} in your picks, so it already has momentum.` : '';
+  return `${statusLead} ${frontRunner} ${nameObj.vibe}`.trim();
+}
+function buildNextStep(scores) {
+  const best = Object.entries(scores).sort((a,b) => b[1]-a[1])[0][0];
+  const map = {
+    memorability: 'Test it spoken out loud three times in a row. If it still feels sharp and easy to repeat, it has real stickiness.',
+    brandability: 'Mock it up on cover art, a flyer, and a streaming profile. Good names survive outside the spreadsheet.',
+    stretch: 'Pressure-test whether it can hold multiple eras and sounds, not just the current moodboard.'
+  };
+  return `<strong>Best next test:</strong> ${map[best]}`;
+}
+function openPickModal(id) {
+  const nameObj = findNameById(id);
+  const modal = document.getElementById('pickModal');
+  if (!nameObj || !modal) return;
+  const ordered = syncPickOrder(getCurrentPicksRaw());
+  const rank = ordered.findIndex(n => n.id === id);
+  const status = getStatus(id);
+  const scores = scoreNamePotential(nameObj);
+  document.getElementById('pickModalTitle').textContent = nameObj.name;
+  document.getElementById('pickModalSubtitle').textContent = `${statusLabel(status)} pick${rank === 0 ? ' • current front-runner' : rank > -1 ? ` • ranked #${rank + 1}` : ''}`;
+  document.getElementById('pickModalVibe').textContent = nameObj.vibe || 'No descriptor yet.';
+  document.getElementById('pickModalKeeper').textContent = buildKeeperReason(nameObj, rank, status);
+  const note = getNote(id);
+  document.getElementById('pickModalNotes').textContent = note || 'No written note yet. That is your cue: add one if this name keeps surviving rounds.';
+  document.getElementById('pickModalNextStep').innerHTML = buildNextStep(scores);
+  document.getElementById('pickModalBadges').innerHTML = [
+    `<div class="modal-badge"><span>Origin</span> <strong>${escapeHtml(inferOrigin(nameObj.vibe))}</strong></div>`,
+    `<div class="modal-badge"><span>Status</span> <strong>${escapeHtml(statusLabel(status))}</strong></div>`,
+    `<div class="modal-badge"><span>Shape</span> <strong>${escapeHtml((nameObj.name || '').trim().split(/\s+/).filter(Boolean).length === 1 ? 'One-word hit' : 'Multi-word phrase')}</strong></div>`
+  ].join('');
+  document.getElementById('pickModalPotential').innerHTML = [
+    ['Memorability', scores.memorability],
+    ['Brand fit', scores.brandability],
+    ['Long-term range', scores.stretch]
+  ].map(([label, value]) => `<div class="potential-row"><span>${escapeHtml(label)}</span><div class="potential-bar"><span style="width:${value}%"></span></div><strong>${value}</strong></div>`).join('');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+function closePickModal() {
+  const modal = document.getElementById('pickModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+function initPickModal() {
+  document.getElementById('pickModalClose')?.addEventListener('click', closePickModal);
+  document.getElementById('pickModalDone')?.addEventListener('click', closePickModal);
+  document.getElementById('pickModal')?.addEventListener('click', e => {
+    if (e.target?.id === 'pickModal') closePickModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closePickModal();
+  });
+}
+
 function render() {
+
   const allNames = BATCHES.flatMap(b => b.names);
   const starred  = allNames.filter(n => getStatus(n.id) === 'starred');
   const maybe    = allNames.filter(n => getStatus(n.id) === 'maybe');
@@ -1274,6 +1465,10 @@ function renderToday(starred, maybe, latest) {
     chip.title = index === 0 ? 'Current front-runner — drag to re-rank' : 'Drag to re-rank';
     chip.innerHTML = `<span class="pick-rank">${index + 1}</span><div class="chip-dot"></div><span class="pick-name">${n.name}</span><span class="drag-handle">⋮⋮</span>`;
 
+    chip.addEventListener('click', () => {
+      if (draggingPickId) return;
+      openPickModal(n.id);
+    });
     chip.addEventListener('dragstart', e => {
       draggingPickId = n.id;
       chip.classList.add('dragging');
