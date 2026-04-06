@@ -149,17 +149,64 @@ html[data-theme='light'] .theme-toggle-moon { opacity: .45; transform: scale(.92
   font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--muted); margin-bottom: 16px; font-weight: 600;
 }
-.picks-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border-soft); }
-.pick-chip {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--surface-2); border: 1px solid var(--border-mid);
-  border-radius: 20px; padding: 5px 12px; font-size: 13px;
+.picks-shell { margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border-soft); }
+.picks-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
 }
+.picks-hint {
+  font-size: 12px; color: var(--muted); line-height: 1.4;
+}
+.mini-btn {
+  background: var(--surface-2); border: 1px solid var(--border-mid); color: var(--text-mid);
+  border-radius: 999px; padding: 7px 12px; font-size: 12px; font-family: inherit; cursor: pointer;
+  transition: all .16s ease;
+}
+.mini-btn:hover { background: var(--surface-hover); color: var(--text-main); border-color: var(--muted-strong); }
+.mini-btn:disabled { opacity: .45; cursor: not-allowed; }
+.picks-strip { display: flex; gap: 10px; flex-wrap: wrap; min-height: 48px; }
+.pick-chip {
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface-2); border: 1px solid var(--border-mid);
+  border-radius: 999px; padding: 8px 14px 8px 10px; font-size: 13px; line-height: 1;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+  cursor: grab; user-select: none; font-family: inherit; color: inherit; appearance: none; -webkit-appearance: none;
+}
+.pick-chip:focus-visible { outline: 2px solid #e8855a; outline-offset: 2px; }
+.pick-chip::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent 0%, transparent 30%, rgba(255,255,255,.18) 48%, transparent 68%, transparent 100%);
+  transform: translateX(-135%); transition: transform .55s ease;
+  pointer-events: none;
+}
+.pick-chip:hover::before { transform: translateX(135%); }
+.pick-chip:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 26px rgba(0,0,0,.18);
+  border-color: var(--muted-strong);
+}
+.pick-chip:active { cursor: grabbing; }
+.pick-chip.dragging { opacity: .5; transform: scale(.98); box-shadow: none; }
+.pick-chip.drop-target { border-color: #e8855a; box-shadow: 0 0 0 3px rgba(232,133,90,.16); }
+.pick-chip.is-top-pick { box-shadow: 0 14px 30px rgba(232,133,90,.22); }
+.pick-rank {
+  width: 20px; height: 20px; border-radius: 999px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; background: rgba(255,255,255,.08); color: inherit;
+}
+.pick-chip.is-top-pick .pick-rank { background: rgba(232,133,90,.2); }
+.pick-chip .chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .pick-chip.starred { background: #1c1608; border-color: #f5a62333; color: #f5c842; }
 .pick-chip.maybe   { background: #141420; border-color: #6366f133; color: #818cf8; }
-.pick-chip .chip-dot { width: 6px; height: 6px; border-radius: 50%; }
 .pick-chip.starred .chip-dot { background: #f5a623; }
 .pick-chip.maybe   .chip-dot { background: #6366f1; }
+.pick-name { font-weight: 600; letter-spacing: .01em; }
+.drag-handle { opacity: .42; font-size: 12px; letter-spacing: -1px; margin-left: 2px; }
+html[data-theme='light'] .mini-btn { background: #fff; }
+html[data-theme='light'] .pick-chip { box-shadow: 0 10px 22px rgba(15,23,42,.08); }
+html[data-theme='light'] .pick-chip:hover { box-shadow: 0 14px 26px rgba(15,23,42,.12); }
 
 .name-card {
   display: flex; align-items: stretch;
@@ -341,7 +388,13 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
 <div class="content">
   <div class="tab-panel active" id="panel-today">
     <div class="today-header">Your current picks</div>
-    <div class="picks-strip" id="picksStrip"></div>
+    <div class="picks-shell">
+      <div class="picks-toolbar">
+        <div class="picks-hint" id="picksHint">Drag to rank your shortlist. The first pill becomes your current front-runner.</div>
+        <button class="mini-btn" id="resetPicksBtn" onclick="resetPickOrder()" disabled>Reset order</button>
+      </div>
+      <div class="picks-strip" id="picksStrip"></div>
+    </div>
     <div class="today-header" id="todayBatchLabel"></div>
     <div id="todayCards"></div>
   </div>
@@ -884,6 +937,7 @@ const NOTES_DEFAULTS = {
 // THEME
 // ─────────────────────────────────────────────
 const THEME_KEY = 'group-name-theme';
+const PICK_ORDER_KEY = 'group-name-pick-order';
 
 function applyTheme(theme) {
   const next = theme === 'light' ? 'light' : 'dark';
@@ -915,6 +969,8 @@ let archiveFilter = 'all';
 let notesOpen     = false;
 let historyStack  = [];
 let isUndoing     = false;
+let pickOrder     = loadPickOrder();
+let draggingPickId = null;
 
 // Render baked-in data immediately so the UI is never blank if Firebase is slow or unavailable.
 render();
@@ -922,6 +978,71 @@ render();
 function getStatus(id) { return reviews[id]?.status || 'unreviewed'; }
 function getNote(id)   { return reviews[id]?.note   || ''; }
 function cloneNotes(src) { return JSON.parse(JSON.stringify(src || NOTES_DEFAULTS)); }
+
+function loadPickOrder() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(PICK_ORDER_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    console.warn('Failed to load pick order:', err);
+    return [];
+  }
+}
+function savePickOrder() {
+  localStorage.setItem(PICK_ORDER_KEY, JSON.stringify(pickOrder));
+}
+function getCurrentPicksRaw() {
+  const all = BATCHES.flatMap(b => b.names);
+  const starred = all.filter(n => getStatus(n.id) === 'starred');
+  const maybe = all.filter(n => getStatus(n.id) === 'maybe');
+  return [...starred, ...maybe];
+}
+function syncPickOrder(picks) {
+  const ids = picks.map(n => n.id);
+  pickOrder = pickOrder.filter(id => ids.includes(id));
+  ids.forEach(id => { if (!pickOrder.includes(id)) pickOrder.push(id); });
+  savePickOrder();
+  return [...picks].sort((a, b) => pickOrder.indexOf(a.id) - pickOrder.indexOf(b.id));
+}
+function hasCustomPickOrder(picks) {
+  return picks.some((n, i) => pickOrder[i] !== n.id);
+}
+function updatePickOrderUi(picks) {
+  const resetBtn = document.getElementById('resetPicksBtn');
+  if (resetBtn) resetBtn.disabled = !picks.length || !hasCustomPickOrder(picks);
+  const hint = document.getElementById('picksHint');
+  if (!hint) return;
+  if (!picks.length) {
+    hint.textContent = 'Star or maybe a few names, then drag these pills to rank your shortlist.';
+  } else if (hasCustomPickOrder(picks)) {
+    hint.textContent = 'Custom order saved. Drag pills to keep refining your shortlist.';
+  } else {
+    hint.textContent = 'Drag to rank your shortlist. The first pill becomes your current front-runner.';
+  }
+}
+function reorderPick(movingId, targetId, placeAfter) {
+  if (!movingId || !targetId || movingId === targetId) return;
+  const previous = [...pickOrder];
+  const next = pickOrder.filter(id => id !== movingId);
+  const targetIndex = next.indexOf(targetId);
+  if (targetIndex === -1) return;
+  next.splice(targetIndex + (placeAfter ? 1 : 0), 0, movingId);
+  if (JSON.stringify(previous) === JSON.stringify(next)) return;
+  pushHistory({ type: 'pick-order', label: 'pick order', previous });
+  pickOrder = next;
+  savePickOrder();
+  render();
+}
+function resetPickOrder() {
+  const picks = getCurrentPicksRaw();
+  if (!picks.length) return;
+  const defaultOrder = picks.map(n => n.id);
+  if (JSON.stringify(defaultOrder) === JSON.stringify(pickOrder)) return;
+  pushHistory({ type: 'pick-order', label: 'pick order', previous: [...pickOrder] });
+  pickOrder = defaultOrder;
+  savePickOrder();
+  render();
+}
 
 function pushHistory(entry) {
   if (isUndoing) return;
@@ -966,6 +1087,10 @@ function undoLastChange() {
     notes = cloneNotes(last.previous);
     if (notesOpen) loadNotesIntoPanel();
     writeNotes(last.previous);
+  } else if (last.type === 'pick-order') {
+    pickOrder = Array.isArray(last.previous) ? [...last.previous] : [];
+    savePickOrder();
+    render();
   }
 
   setTimeout(() => {
@@ -1135,14 +1260,54 @@ function render() {
 function renderToday(starred, maybe, latest) {
   const strip = document.getElementById('picksStrip');
   strip.innerHTML = '';
-  [...starred, ...maybe].forEach(n => {
+
+  const orderedPicks = syncPickOrder([...starred, ...maybe]);
+  updatePickOrderUi(orderedPicks);
+
+  orderedPicks.forEach((n, index) => {
     const s = getStatus(n.id);
-    const chip = document.createElement('div');
-    chip.className = 'pick-chip ' + s;
-    chip.innerHTML = `<div class="chip-dot"></div><span>${n.name}</span>`;
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.draggable = true;
+    chip.className = 'pick-chip ' + s + (index === 0 ? ' is-top-pick' : '');
+    chip.dataset.id = n.id;
+    chip.title = index === 0 ? 'Current front-runner — drag to re-rank' : 'Drag to re-rank';
+    chip.innerHTML = `<span class="pick-rank">${index + 1}</span><div class="chip-dot"></div><span class="pick-name">${n.name}</span><span class="drag-handle">⋮⋮</span>`;
+
+    chip.addEventListener('dragstart', e => {
+      draggingPickId = n.id;
+      chip.classList.add('dragging');
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', n.id);
+      }
+    });
+    chip.addEventListener('dragenter', () => {
+      if (draggingPickId && draggingPickId !== n.id) chip.classList.add('drop-target');
+    });
+    chip.addEventListener('dragover', e => {
+      if (!draggingPickId || draggingPickId === n.id) return;
+      e.preventDefault();
+      chip.classList.add('drop-target');
+    });
+    chip.addEventListener('dragleave', () => chip.classList.remove('drop-target'));
+    chip.addEventListener('drop', e => {
+      e.preventDefault();
+      chip.classList.remove('drop-target');
+      if (!draggingPickId || draggingPickId === n.id) return;
+      const rect = chip.getBoundingClientRect();
+      const placeAfter = e.clientX > rect.left + rect.width / 2;
+      reorderPick(draggingPickId, n.id, placeAfter);
+    });
+    chip.addEventListener('dragend', () => {
+      draggingPickId = null;
+      strip.querySelectorAll('.pick-chip').forEach(el => el.classList.remove('dragging', 'drop-target'));
+    });
+
     strip.appendChild(chip);
   });
-  if (!starred.length && !maybe.length) {
+
+  if (!orderedPicks.length) {
     strip.innerHTML = '<div style="font-size:13px;color:var(--muted)">No picks yet — star or maybe names below</div>';
   }
 
@@ -1316,6 +1481,7 @@ window.exportAll       = exportAll;
 window.exportNotes     = exportNotes;
 window.undoLastChange  = undoLastChange;
 window.toggleTheme    = toggleTheme;
+window.resetPickOrder = resetPickOrder;
 </script>
 </body>
 </html>
