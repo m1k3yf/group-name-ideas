@@ -212,6 +212,8 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0c0c0c; col
 .export-btn:hover { background: #1e1e1e; color: #fff; border-color: #444; }
 .export-btn.primary { background: linear-gradient(135deg, #f0c27f, #e8855a); color: #000; border: none; font-weight: 600; }
 .export-btn.primary:hover { opacity: .9; }
+.export-btn:disabled, .header-btn:disabled { opacity: .4; cursor: not-allowed; }
+.export-btn:disabled:hover, .header-btn:disabled:hover { background: #161616; color: #bbb; border-color: #2a2a2a; }
 
 @media (max-width: 600px) {
   .header, .content, .bottom-bar { padding-left: 16px; padding-right: 16px; }
@@ -318,6 +320,7 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0c0c0c; col
     <div class="stat-chip r" id="statRejected">✕ 0</div>
   </div>
   <div class="bottom-right">
+    <button class="export-btn" id="undoBtn" onclick="undoLastChange()" disabled>Undo Last Change</button>
     <button class="export-btn" onclick="exportAll()">Export Summary</button>
     <button class="export-btn primary" onclick="exportFavorites()">Copy Picks</button>
   </div>
@@ -781,16 +784,34 @@ const NOTES_DEFAULTS = {
 // ─────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────
-let reviews      = { ...BAKED_STATE };
-let notes        = { ...NOTES_DEFAULTS };
+let reviews       = { ...BAKED_STATE };
+let notes         = { ...NOTES_DEFAULTS };
 let archiveFilter = 'all';
 let notesOpen     = false;
+let historyStack  = [];
+let isUndoing     = false;
 
 // Render baked-in data immediately so the UI is never blank if Firebase is slow or unavailable.
 render();
 
 function getStatus(id) { return reviews[id]?.status || 'unreviewed'; }
 function getNote(id)   { return reviews[id]?.note   || ''; }
+function cloneNotes(src) { return JSON.parse(JSON.stringify(src || NOTES_DEFAULTS)); }
+
+function pushHistory(entry) {
+  if (isUndoing) return;
+  historyStack.push(entry);
+  if (historyStack.length > 50) historyStack.shift();
+  updateUndoButton();
+}
+
+function updateUndoButton() {
+  const btn = document.getElementById('undoBtn');
+  if (!btn) return;
+  const last = historyStack[historyStack.length - 1];
+  btn.disabled = !last;
+  btn.textContent = last ? `Undo ${last.label}` : 'Undo Last Change';
+}
 
 // ─────────────────────────────────────────────
 // FIREBASE WRITES
@@ -806,6 +827,25 @@ function writeNotes(n) {
     console.error('Failed to write notes:', err);
     document.getElementById('liveDot')?.classList.add('offline');
   });
+}
+
+function undoLastChange() {
+  const last = historyStack.pop();
+  updateUndoButton();
+  if (!last) return;
+
+  isUndoing = true;
+  if (last.type === 'review') {
+    writeReview(last.id, last.previous);
+  } else if (last.type === 'notes') {
+    notes = cloneNotes(last.previous);
+    if (notesOpen) loadNotesIntoPanel();
+    writeNotes(last.previous);
+  }
+
+  setTimeout(() => {
+    isUndoing = false;
+  }, 0);
 }
 
 // Seed Firebase on very first load
@@ -848,10 +888,16 @@ onValue(
 function setStatus(id, newStatus) {
   const cur  = getStatus(id);
   const next = cur === newStatus ? 'unreviewed' : newStatus;
+  if (cur === next) return;
+  pushHistory({ type: 'review', label: 'status change', id, previous: { status: cur } });
   writeReview(id, { status: next });
 }
 function setNameNote(id, val) {
-  writeReview(id, { note: val });
+  const previousNote = getNote(id);
+  const nextNote = val.trim();
+  if (previousNote === nextNote) return;
+  pushHistory({ type: 'review', label: 'note edit', id, previous: { note: previousNote } });
+  writeReview(id, { note: nextNote });
 }
 
 // ─────────────────────────────────────────────
@@ -1074,15 +1120,20 @@ function closeNotes() {
   document.getElementById('notesBtn').classList.remove('notes-active');
 }
 function saveAndCloseNotes() {
-  const n = {
-    clicking: document.getElementById('n-clicking').value,
-    avoid:    document.getElementById('n-avoid').value,
-    explore:  document.getElementById('n-explore').value,
-    refs:     document.getElementById('n-refs').value,
-    general:  document.getElementById('n-general').value,
+  const nextNotes = {
+    clicking: document.getElementById('n-clicking').value.trim(),
+    avoid:    document.getElementById('n-avoid').value.trim(),
+    explore:  document.getElementById('n-explore').value.trim(),
+    refs:     document.getElementById('n-refs').value.trim(),
+    general:  document.getElementById('n-general').value.trim(),
   };
-  notes = n;
-  writeNotes(n);
+
+  if (JSON.stringify(nextNotes) !== JSON.stringify(notes)) {
+    pushHistory({ type: 'notes', label: 'direction notes', previous: cloneNotes(notes) });
+  }
+
+  notes = nextNotes;
+  writeNotes(nextNotes);
   closeNotes();
 }
 function loadNotesIntoPanel() {
@@ -1138,6 +1189,7 @@ window.saveAndCloseNotes = saveAndCloseNotes;
 window.exportFavorites = exportFavorites;
 window.exportAll       = exportAll;
 window.exportNotes     = exportNotes;
+window.undoLastChange  = undoLastChange;
 </script>
 </body>
 </html>
