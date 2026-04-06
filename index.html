@@ -1075,6 +1075,7 @@ let notesOpen     = false;
 let historyStack  = [];
 let isUndoing     = false;
 let pickOrder     = loadPickOrder();
+let lastRemotePickOrderJson = JSON.stringify(pickOrder);
 let draggingPickId = null;
 
 // Render baked-in data immediately so the UI is never blank if Firebase is slow or unavailable.
@@ -1097,6 +1098,35 @@ function loadPickOrder() {
 function savePickOrder() {
   localStorage.setItem(PICK_ORDER_KEY, JSON.stringify(pickOrder));
 }
+function normalizePickOrder(order, validIds) {
+  const seed = Array.isArray(order) ? order : [];
+  const seen = new Set();
+  const next = [];
+  seed.forEach(id => {
+    if (!validIds.includes(id) || seen.has(id)) return;
+    seen.add(id);
+    next.push(id);
+  });
+  validIds.forEach(id => {
+    if (seen.has(id)) return;
+    seen.add(id);
+    next.push(id);
+  });
+  return next;
+}
+function getNormalizedPickOrderForCurrentPicks(order = pickOrder) {
+  return normalizePickOrder(order, getCurrentPicksRaw().map(n => n.id));
+}
+function writePickOrder(order = pickOrder) {
+  const normalized = getNormalizedPickOrderForCurrentPicks(order);
+  pickOrder = [...normalized];
+  savePickOrder();
+  lastRemotePickOrderJson = JSON.stringify(normalized);
+  set(ref(db, 'pickOrder'), normalized).catch(err => {
+    console.error('Failed to write pick order:', err);
+    document.getElementById('liveDot')?.classList.add('offline');
+  });
+}
 function getCurrentPicksRaw() {
   const all = BATCHES.flatMap(b => b.names);
   const starred = all.filter(n => getStatus(n.id) === 'starred');
@@ -1105,9 +1135,16 @@ function getCurrentPicksRaw() {
 }
 function syncPickOrder(picks) {
   const ids = picks.map(n => n.id);
-  pickOrder = pickOrder.filter(id => ids.includes(id));
-  ids.forEach(id => { if (!pickOrder.includes(id)) pickOrder.push(id); });
+  const normalized = normalizePickOrder(pickOrder, ids);
+  const changed = JSON.stringify(normalized) !== JSON.stringify(pickOrder);
+  pickOrder = normalized;
   savePickOrder();
+  if (changed) {
+    queueMicrotask(() => {
+      const nextJson = JSON.stringify(pickOrder);
+      if (nextJson !== lastRemotePickOrderJson) writePickOrder(pickOrder);
+    });
+  }
   return [...picks].sort((a, b) => pickOrder.indexOf(a.id) - pickOrder.indexOf(b.id));
 }
 function hasCustomPickOrder(picks) {
@@ -1136,7 +1173,7 @@ function reorderPick(movingId, targetId, placeAfter) {
   if (JSON.stringify(previous) === JSON.stringify(next)) return;
   pushHistory({ type: 'pick-order', label: 'pick order', previous });
   pickOrder = next;
-  savePickOrder();
+  writePickOrder(next);
   render();
 }
 function resetPickOrder() {
@@ -1146,7 +1183,7 @@ function resetPickOrder() {
   if (JSON.stringify(defaultOrder) === JSON.stringify(pickOrder)) return;
   pushHistory({ type: 'pick-order', label: 'pick order', previous: [...pickOrder] });
   pickOrder = defaultOrder;
-  savePickOrder();
+  writePickOrder(defaultOrder);
   render();
 }
 
@@ -1195,7 +1232,7 @@ function undoLastChange() {
     writeNotes(last.previous);
   } else if (last.type === 'pick-order') {
     pickOrder = Array.isArray(last.previous) ? [...last.previous] : [];
-    savePickOrder();
+    writePickOrder(pickOrder);
     render();
   }
 
@@ -1220,6 +1257,12 @@ onValue(
   snapshot => {
     const data = snapshot.val() || {};
     reviews = { ...BAKED_STATE, ...(data.reviews || {}) };
+
+    const remotePickOrder = Array.isArray(data.pickOrder) ? data.pickOrder : [];
+    const normalizedRemotePickOrder = getNormalizedPickOrderForCurrentPicks(remotePickOrder);
+    pickOrder = [...normalizedRemotePickOrder];
+    savePickOrder();
+    lastRemotePickOrderJson = JSON.stringify(normalizedRemotePickOrder);
 
     const active = document.activeElement;
     const typing = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT');
