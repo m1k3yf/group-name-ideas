@@ -230,15 +230,23 @@ html[data-theme='light'] .pick-chip.maybe   { background: #eef0ff; border-color:
   border: 1px solid var(--border); border-radius: 24px; background: var(--card);
   box-shadow: 0 28px 70px rgba(0,0,0,.42); padding: 22px;
 }
-.modal-topbar { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.modal-topbar { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.modal-headcopy { min-width: 0; }
 .modal-kicker { color: var(--muted); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
 .modal-title { font-size: clamp(28px, 4vw, 42px); line-height: 1; margin: 6px 0 10px; }
 .modal-subtitle { color: var(--muted); font-size: 14px; }
+.modal-nav {
+  border: 1px solid var(--border); background: rgba(255,255,255,.03); color: var(--text); border-radius: 999px;
+  min-width: 42px; height: 42px; font-size: 20px; cursor: pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease, opacity .18s ease;
+}
+.modal-nav:hover:not(:disabled), .modal-close:hover { transform: translateY(-1px); border-color: var(--border-soft); background: rgba(255,255,255,.06); }
+.modal-nav:disabled { opacity: .35; cursor: not-allowed; }
 .modal-close {
   border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 999px;
   min-width: 42px; height: 42px; font-size: 20px; cursor: pointer;
 }
-.modal-close:hover { transform: translateY(-1px); border-color: var(--border-soft); }
+.modal-swipe-hint { margin: 10px 0 0; color: var(--muted); font-size: 12px; }
+.modal-position { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); font-size: 12px; }
 .modal-badges { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 18px; }
 .modal-badge {
   display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px;
@@ -268,6 +276,9 @@ html[data-theme='light'] .potential-bar { background: rgba(15,23,42,.08); }
 @media (max-width: 760px) {
   .modal-grid { grid-template-columns: 1fr; }
   .modal-panel { padding: 18px; border-radius: 20px; }
+  .modal-topbar { grid-template-columns: 42px 1fr 42px; align-items: start; }
+  .modal-title { font-size: clamp(24px, 8vw, 34px); }
+  .modal-position { margin-left: 0; margin-top: 10px; }
 }
 html[data-theme='light'] .name-card.is-starred { background: #fff8ea; }
 html[data-theme='light'] .name-card.is-maybe   { background: #f3f2ff; }
@@ -516,15 +527,23 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
 
 
 <div class="modal-backdrop" id="pickModal" aria-hidden="true">
-  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="pickModalTitle">
+  <div class="modal-panel" id="pickModalPanel" role="dialog" aria-modal="true" aria-labelledby="pickModalTitle">
     <div class="modal-topbar">
-      <div>
+      <button class="modal-nav" id="pickModalPrev" type="button" aria-label="Previous pick">←</button>
+      <div class="modal-headcopy">
         <div class="modal-kicker">Current pick breakdown</div>
         <div class="modal-title" id="pickModalTitle">Name</div>
         <div class="modal-subtitle" id="pickModalSubtitle"></div>
+        <div>
+          <span class="modal-position" id="pickModalPosition">1 of 1</span>
+        </div>
       </div>
-      <button class="modal-close" id="pickModalClose" type="button" aria-label="Close">×</button>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="modal-nav" id="pickModalNext" type="button" aria-label="Next pick">→</button>
+        <button class="modal-close" id="pickModalClose" type="button" aria-label="Close">×</button>
+      </div>
     </div>
+    <div class="modal-swipe-hint" id="pickModalSwipeHint">Use arrows or swipe to move through your shortlist.</div>
     <div class="modal-badges" id="pickModalBadges"></div>
     <div class="modal-grid">
       <div class="modal-card">
@@ -1373,14 +1392,39 @@ function buildNextStep(scores) {
   };
   return `<strong>Best next test:</strong> ${map[best]}`;
 }
+let activePickModalId = null;
+let pickModalTouchStartX = null;
+let pickModalTouchStartY = null;
+function getModalPickOrder() {
+  return syncPickOrder(getCurrentPicksRaw());
+}
+function navigatePickModal(direction) {
+  const ordered = getModalPickOrder();
+  if (!ordered.length || !activePickModalId) return;
+  const currentIndex = ordered.findIndex(n => n.id === activePickModalId);
+  if (currentIndex === -1) return;
+  const nextIndex = (currentIndex + direction + ordered.length) % ordered.length;
+  openPickModal(ordered[nextIndex].id);
+}
+function updatePickModalNav(ordered, currentIndex) {
+  const prevBtn = document.getElementById('pickModalPrev');
+  const nextBtn = document.getElementById('pickModalNext');
+  const position = document.getElementById('pickModalPosition');
+  const count = ordered.length;
+  const hasMultiple = count > 1;
+  if (position) position.textContent = count ? `${currentIndex + 1} of ${count}` : '0 of 0';
+  if (prevBtn) prevBtn.disabled = !hasMultiple;
+  if (nextBtn) nextBtn.disabled = !hasMultiple;
+}
 function openPickModal(id) {
   const nameObj = findNameById(id);
   const modal = document.getElementById('pickModal');
   if (!nameObj || !modal) return;
-  const ordered = syncPickOrder(getCurrentPicksRaw());
+  const ordered = getModalPickOrder();
   const rank = ordered.findIndex(n => n.id === id);
   const status = getStatus(id);
   const scores = scoreNamePotential(nameObj);
+  activePickModalId = id;
   document.getElementById('pickModalTitle').textContent = nameObj.name;
   document.getElementById('pickModalSubtitle').textContent = `${statusLabel(status)} pick${rank === 0 ? ' • current front-runner' : rank > -1 ? ` • ranked #${rank + 1}` : ''}`;
   document.getElementById('pickModalVibe').textContent = nameObj.vibe || 'No descriptor yet.';
@@ -1398,6 +1442,7 @@ function openPickModal(id) {
     ['Brand fit', scores.brandability],
     ['Long-term range', scores.stretch]
   ].map(([label, value]) => `<div class="potential-row"><span>${escapeHtml(label)}</span><div class="potential-bar"><span style="width:${value}%"></span></div><strong>${value}</strong></div>`).join('');
+  updatePickModalNav(ordered, Math.max(rank, 0));
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
 }
@@ -1406,15 +1451,41 @@ function closePickModal() {
   if (!modal) return;
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
+  activePickModalId = null;
 }
 function initPickModal() {
   document.getElementById('pickModalClose')?.addEventListener('click', closePickModal);
   document.getElementById('pickModalDone')?.addEventListener('click', closePickModal);
+  document.getElementById('pickModalPrev')?.addEventListener('click', () => navigatePickModal(-1));
+  document.getElementById('pickModalNext')?.addEventListener('click', () => navigatePickModal(1));
   document.getElementById('pickModal')?.addEventListener('click', e => {
     if (e.target?.id === 'pickModal') closePickModal();
   });
+  const panel = document.getElementById('pickModalPanel');
+  panel?.addEventListener('touchstart', e => {
+    const touch = e.changedTouches?.[0];
+    if (!touch) return;
+    pickModalTouchStartX = touch.clientX;
+    pickModalTouchStartY = touch.clientY;
+  }, { passive: true });
+  panel?.addEventListener('touchend', e => {
+    const touch = e.changedTouches?.[0];
+    if (!touch || pickModalTouchStartX == null || pickModalTouchStartY == null) return;
+    const deltaX = touch.clientX - pickModalTouchStartX;
+    const deltaY = touch.clientY - pickModalTouchStartY;
+    pickModalTouchStartX = null;
+    pickModalTouchStartY = null;
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY)) return;
+    if (deltaX < 0) navigatePickModal(1);
+    else navigatePickModal(-1);
+  }, { passive: true });
   document.addEventListener('keydown', e => {
+    const modal = document.getElementById('pickModal');
+    const isOpen = modal?.classList.contains('open');
     if (e.key === 'Escape') closePickModal();
+    if (!isOpen) return;
+    if (e.key === 'ArrowLeft') navigatePickModal(-1);
+    if (e.key === 'ArrowRight') navigatePickModal(1);
   });
 }
 
