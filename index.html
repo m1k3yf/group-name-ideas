@@ -141,7 +141,37 @@ html[data-theme='light'] .theme-toggle-moon { opacity: .45; transform: scale(.92
 }
 .tab.active .badge { background: #e8855a22; color: #e8855a; }
 
-.content { padding: 28px 36px 120px; max-width: 820px; }
+.app-shell { max-width: 1220px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 820px) 320px; gap: 28px; align-items: start; }
+.content { padding: 28px 0 120px 36px; max-width: none; min-width: 0; }
+.insight-rail { padding: 28px 36px 120px 0; }
+.insight-stack { position: sticky; top: 132px; display: grid; gap: 14px; }
+.rail-card { background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 78%, transparent), color-mix(in srgb, var(--surface-2) 92%, transparent)); border: 1px solid var(--border-soft); border-radius: 20px; padding: 18px; box-shadow: var(--shadow-soft); overflow: hidden; position: relative; }
+.rail-card::after { content: ''; position: absolute; inset: auto -10% -65% -10%; height: 110px; background: radial-gradient(circle at center, rgba(232,133,90,.12), transparent 70%); pointer-events: none; }
+.rail-kicker { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 700; }
+.rail-hero { min-height: 220px; }
+.rail-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+.rail-orb { position: relative; width: 82px; height: 82px; border-radius: 50%; flex-shrink: 0; background: radial-gradient(circle at 30% 30%, rgba(240,194,127,.95), rgba(232,133,90,.85) 42%, rgba(201,64,115,.48) 72%, transparent 73%), radial-gradient(circle at 60% 60%, rgba(255,255,255,.14), transparent 65%); box-shadow: 0 0 0 10px rgba(232,133,90,.06), 0 0 36px rgba(232,133,90,.22); animation: railFloat 4.8s ease-in-out infinite; }
+.rail-orb::before, .rail-orb::after { content: ''; position: absolute; inset: -10px; border-radius: 50%; border: 1px solid rgba(232,133,90,.18); animation: railPulse 3.4s ease-out infinite; }
+.rail-orb::after { inset: -22px; animation-delay: 1.2s; }
+@keyframes railFloat { 0%,100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-6px) scale(1.03); } }
+@keyframes railPulse { 0% { transform: scale(.92); opacity: .75; } 70% { transform: scale(1.08); opacity: 0; } 100% { transform: scale(1.08); opacity: 0; } }
+.rail-front-runner { font-size: 24px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; margin-bottom: 8px; }
+.rail-front-runner-sub { color: var(--text-soft-2); font-size: 13px; line-height: 1.55; }
+.rail-pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.rail-pill { display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 999px; background: color-mix(in srgb, var(--surface-2) 88%, transparent); border: 1px solid var(--border-soft); font-size: 12px; color: var(--text-mid); }
+.rail-pill strong { color: var(--text-main); font-size: 13px; }
+.rail-metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rail-metric { border: 1px solid var(--border-soft); background: color-mix(in srgb, var(--surface-2) 80%, transparent); border-radius: 16px; padding: 12px; }
+.rail-metric-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.rail-metric-value { font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
+.rail-metric-note { margin-top: 6px; font-size: 12px; color: var(--text-soft-2); line-height: 1.45; }
+.rail-copy { font-size: 13px; line-height: 1.65; color: var(--text-mid-2); }
+.rail-copy strong { color: var(--text-main); }
+.rail-action { margin-top: 12px; padding: 12px 14px; border-radius: 16px; background: linear-gradient(135deg, rgba(240,194,127,.14), rgba(232,133,90,.08)); border: 1px solid rgba(232,133,90,.18); font-size: 13px; line-height: 1.55; color: var(--text-mid-2); }
+.rail-question-list { display: grid; gap: 8px; margin-top: 12px; }
+.rail-question { border-radius: 14px; padding: 10px 12px; background: color-mix(in srgb, var(--surface-2) 86%, transparent); border: 1px solid var(--border-soft); font-size: 12px; color: var(--text-soft-2); line-height: 1.45; }
+html[data-theme='light'] .rail-card { background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(247,249,252,.95)); }
+html[data-theme='light'] .rail-orb { box-shadow: 0 0 0 10px rgba(232,133,90,.07), 0 14px 34px rgba(232,133,90,.14); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
@@ -413,8 +443,14 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
 .export-btn:disabled, .header-btn:disabled { opacity: .4; cursor: not-allowed; }
 .export-btn:disabled:hover, .header-btn:disabled:hover { background: var(--surface-2); color: var(--text-mid); border-color: var(--border-strong); }
 
+@media (max-width: 1100px) {
+  .app-shell { display: block; }
+  .content { padding-right: 36px; }
+  .insight-rail { display: none; }
+}
 @media (max-width: 600px) {
-  .header, .content, .bottom-bar { padding-left: 16px; padding-right: 16px; }
+  .header, .bottom-bar { padding-left: 16px; padding-right: 16px; }
+  .content { padding-left: 16px; padding-right: 16px; }
   .name-label { font-size: 17px; }
 }
 </style>
@@ -445,6 +481,7 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
   </div>
 </div>
 
+<div class="app-shell">
 <div class="content">
   <div class="tab-panel active" id="panel-today">
     <div class="today-header">Your current picks</div>
@@ -481,6 +518,61 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
     </div>
     <div id="archiveCards"></div>
   </div>
+</div>
+<aside class="insight-rail" aria-label="Name review insights">
+  <div class="insight-stack">
+    <section class="rail-card rail-hero">
+      <div class="rail-kicker">Decision momentum</div>
+      <div class="rail-hero-top">
+        <div>
+          <div class="rail-front-runner" id="railFrontRunner">No leader yet</div>
+          <div class="rail-front-runner-sub" id="railFrontRunnerSub">Star a few names and the right-side rail will start helping you cut through the noise.</div>
+        </div>
+        <div class="rail-orb" aria-hidden="true"></div>
+      </div>
+      <div class="rail-pill-row">
+        <div class="rail-pill"><span>🔥</span><strong id="railMomentumWord">Warming up</strong></div>
+        <div class="rail-pill"><span>🧪</span><strong id="railTestCue">Need more pressure tests</strong></div>
+      </div>
+    </section>
+
+    <section class="rail-card">
+      <div class="rail-kicker">Signal board</div>
+      <div class="rail-metric-grid">
+        <div class="rail-metric">
+          <div class="rail-metric-label">Reviewed</div>
+          <div class="rail-metric-value" id="railReviewedPct">0%</div>
+          <div class="rail-metric-note" id="railReviewedNote">No signal yet.</div>
+        </div>
+        <div class="rail-metric">
+          <div class="rail-metric-label">Shortlist</div>
+          <div class="rail-metric-value" id="railShortlistCount">0</div>
+          <div class="rail-metric-note" id="railShortlistNote">Too empty to compare.</div>
+        </div>
+        <div class="rail-metric">
+          <div class="rail-metric-label">Front-runner edge</div>
+          <div class="rail-metric-value" id="railEdgeValue">—</div>
+          <div class="rail-metric-note" id="railEdgeNote">No ranking tension yet.</div>
+        </div>
+        <div class="rail-metric">
+          <div class="rail-metric-label">Maybe pressure</div>
+          <div class="rail-metric-value" id="railMaybePressure">0%</div>
+          <div class="rail-metric-note" id="railMaybeNote">Your shortlist is still undefined.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rail-card">
+      <div class="rail-kicker">Why this space matters</div>
+      <div class="rail-copy" id="railMotivation">A good name rarely wins because it looked pretty in a list. It wins because it survives repeated pressure from different angles.</div>
+      <div class="rail-action" id="railNextMove">Next move: star a few names first, then drag them into a real ranking instead of treating every maybe like equal quality.</div>
+      <div class="rail-question-list">
+        <div class="rail-question" id="railQuestion1">Which name still feels strong after you say it out loud ten times?</div>
+        <div class="rail-question" id="railQuestion2">Which one creates the clearest visual or emotional world immediately?</div>
+      </div>
+    </section>
+  </div>
+</aside>
 </div>
 
 <div class="notes-overlay" id="notesOverlay" onclick="closeNotes()"></div>
@@ -1535,6 +1627,87 @@ function initPickModal() {
   });
 }
 
+function updateInsightRail(allNames, starred, maybe, rejected, unreviewed, latest, orderedPicks) {
+  const reviewedCount = allNames.length - unreviewed.length;
+  const reviewedPct = allNames.length ? Math.round((reviewedCount / allNames.length) * 100) : 0;
+  const shortlistCount = orderedPicks.length;
+  const maybePressure = shortlistCount ? Math.round((maybe.length / shortlistCount) * 100) : 0;
+  const leader = orderedPicks[0];
+  const second = orderedPicks[1];
+  const leaderStatus = leader ? getStatus(leader.id) : null;
+
+  let momentumWord = 'Warming up';
+  if (leader && shortlistCount >= 3 && maybe.length <= 1) momentumWord = 'Strong signal';
+  else if (leader && shortlistCount >= 2) momentumWord = 'Taking shape';
+  else if (reviewedPct >= 70) momentumWord = 'Near decision';
+
+  let testCue = 'Need more pressure tests';
+  if (leader && second) testCue = `Pressure-test ${leader.name} vs ${second.name}`;
+  else if (leader) testCue = `Find a challenger for ${leader.name}`;
+  else if (shortlistCount > 0) testCue = 'Turn maybes into a rank';
+
+  document.getElementById('railFrontRunner').textContent = leader ? leader.name : 'No leader yet';
+  document.getElementById('railFrontRunnerSub').textContent = leader
+    ? `${leaderStatus === 'starred' ? 'Starred' : 'Maybe'} and currently ranked #1. ${second ? `${second.name} is the closest challenger.` : 'It needs one real challenger to prove it deserves the top spot.'}`
+    : 'Star or maybe a few names, then drag them into order. Ranking exposes what you actually believe.';
+  document.getElementById('railMomentumWord').textContent = momentumWord;
+  document.getElementById('railTestCue').textContent = testCue;
+
+  document.getElementById('railReviewedPct').textContent = `${reviewedPct}%`;
+  document.getElementById('railReviewedNote').textContent = reviewedPct >= 85
+    ? 'Most of the noise is gone. Now make the hard cuts.'
+    : reviewedPct >= 50
+      ? 'You have enough signal to rank seriously.'
+      : 'You are still early. Do not overcommit too soon.';
+
+  document.getElementById('railShortlistCount').textContent = shortlistCount;
+  document.getElementById('railShortlistNote').textContent = shortlistCount === 0
+    ? 'Too empty to compare.'
+    : shortlistCount <= 2
+      ? 'A tiny list. Great for focus, risky for blind spots.'
+      : shortlistCount <= 5
+        ? 'Healthy size for real comparison.'
+        : 'Too many keepers. Start cutting.';
+
+  const edgeValue = leader && second ? '#1 vs #2' : leader ? '#1 locked' : '—';
+  document.getElementById('railEdgeValue').textContent = edgeValue;
+  document.getElementById('railEdgeNote').textContent = leader && second
+    ? `${leader.name} only matters if it still wins when placed directly against ${second.name}.`
+    : leader
+      ? `${leader.name} is alone on top right now, but that can be fake certainty.`
+      : 'No ranking tension yet.';
+
+  document.getElementById('railMaybePressure').textContent = `${maybePressure}%`;
+  document.getElementById('railMaybeNote').textContent = maybePressure >= 60
+    ? 'You are protecting too many names from a real verdict.'
+    : maybePressure >= 30
+      ? 'Some uncertainty is healthy, but start forcing choices.'
+      : shortlistCount ? 'Your list is leaning toward conviction.' : 'Your shortlist is still undefined.';
+
+  let motivation = 'A good name rarely wins because it looked pretty in a list. It wins because it survives repeated pressure from different angles.';
+  if (leader && second) motivation = `${leader.name} is ahead, but the goal is not to admire it. The goal is to find out whether it still feels inevitable after you compare it against ${second.name}.`;
+  else if (shortlistCount >= 4) motivation = 'You have enough live options. Now the job is not collecting more names. It is increasing contrast until the weak ones expose themselves.';
+  else if (reviewedPct >= 70) motivation = 'You are close enough now that one sharp comparison can do more than twenty new ideas.';
+  document.getElementById('railMotivation').textContent = motivation;
+
+  let nextMove = 'Next move: star a few names first, then drag them into a real ranking instead of treating every maybe like equal quality.';
+  if (leader && second) nextMove = `Next move: ask one brutal question — which name would you still choose if ${second.name} suddenly became unavailable? If the answer is not instantly ${leader.name}, your ranking is still soft.`;
+  else if (leader && !second) nextMove = `Next move: find one serious rival for ${leader.name}. A winner without a challenger is usually just the first decent option, not the best option.`;
+  else if (maybe.length >= 3) nextMove = 'Next move: convert at least one maybe into either a star or a rejection. Too many maybes keep you emotionally comfortable and strategically confused.';
+  document.getElementById('railNextMove').textContent = nextMove;
+
+  const q1 = leader
+    ? `If ${leader.name} were the final choice tonight, what is the strongest argument against it?`
+    : 'Which name would be easiest for someone else to remember after hearing it once?';
+  const q2 = second
+    ? `What does ${second.name} do better than ${leader ? leader.name : 'the leader'} — sound, mood, image, or memorability?`
+    : latest
+      ? `From ${latest.label}, which unreviewed name deserves a faster yes-or-no instead of another maybe?`
+      : 'Which name creates the clearest world around it without extra explanation?';
+  document.getElementById('railQuestion1').textContent = q1;
+  document.getElementById('railQuestion2').textContent = q2;
+}
+
 function render() {
 
   const allNames = BATCHES.flatMap(b => b.names);
@@ -1552,6 +1725,7 @@ function render() {
   document.getElementById('rejectedBadge').textContent   = rejected.length > 0 ? rejected.length : '';
 
   const latest = BATCHES[BATCHES.length - 1];
+  const orderedPicks = syncPickOrder([...starred, ...maybe]);
   const newInLatest = latest.names.filter(n => getStatus(n.id) === 'unreviewed').length;
   document.getElementById('todayBadge').textContent    = newInLatest > 0 ? newInLatest + ' new' : 'done';
   document.getElementById('keepersBadge').textContent  = starred.length + maybe.length;
@@ -1559,17 +1733,18 @@ function render() {
   const archiveBadge = document.getElementById('archiveBadge');
   if (archiveBadge) archiveBadge.textContent = allNames.length;
 
-  renderToday(starred, maybe, latest);
+  renderToday(starred, maybe, latest, orderedPicks);
   renderKeepers(starred, maybe);
+  updateInsightRail(allNames, starred, maybe, rejected, unreviewed, latest, orderedPicks);
   renderInReview(unreviewed);
   renderArchive(archiveFilter);
 }
 
-function renderToday(starred, maybe, latest) {
+function renderToday(starred, maybe, latest, orderedPicks = null) {
   const strip = document.getElementById('picksStrip');
   strip.innerHTML = '';
 
-  const orderedPicks = syncPickOrder([...starred, ...maybe]);
+  orderedPicks = orderedPicks || syncPickOrder([...starred, ...maybe]);
   updatePickOrderUi(orderedPicks);
 
   orderedPicks.forEach((n, index) => {
