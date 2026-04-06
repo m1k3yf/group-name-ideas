@@ -233,6 +233,7 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0c0c0c; col
     <button class="tab active" data-tab="today">Today <span class="badge" id="todayBadge"></span></button>
     <button class="tab" data-tab="keepers">Keepers <span class="badge" id="keepersBadge"></span></button>
     <button class="tab" data-tab="inreview">In Review <span class="badge" id="inreviewBadge"></span></button>
+    <button class="tab" data-tab="archive">Archive <span class="badge" id="archiveBadge"></span></button>
   </div>
 </div>
 
@@ -785,6 +786,9 @@ let notes        = { ...NOTES_DEFAULTS };
 let archiveFilter = 'all';
 let notesOpen     = false;
 
+// Render baked-in data immediately so the UI is never blank if Firebase is slow or unavailable.
+render();
+
 function getStatus(id) { return reviews[id]?.status || 'unreviewed'; }
 function getNote(id)   { return reviews[id]?.note   || ''; }
 
@@ -792,32 +796,51 @@ function getNote(id)   { return reviews[id]?.note   || ''; }
 // FIREBASE WRITES
 // ─────────────────────────────────────────────
 function writeReview(id, changes) {
-  update(ref(db, 'reviews/' + id), changes);
+  update(ref(db, 'reviews/' + id), changes).catch(err => {
+    console.error('Failed to write review:', err);
+    document.getElementById('liveDot')?.classList.add('offline');
+  });
 }
 function writeNotes(n) {
-  set(ref(db, 'notes'), n);
+  set(ref(db, 'notes'), n).catch(err => {
+    console.error('Failed to write notes:', err);
+    document.getElementById('liveDot')?.classList.add('offline');
+  });
 }
 
 // Seed Firebase on very first load
-get(ref(db, 'reviews')).then(snap => {
-  if (!snap.exists()) set(ref(db, 'reviews'), BAKED_STATE);
-});
+get(ref(db, 'reviews'))
+  .then(snap => {
+    if (!snap.exists()) return set(ref(db, 'reviews'), BAKED_STATE);
+  })
+  .catch(err => {
+    console.error('Firebase seed check failed:', err);
+    document.getElementById('liveDot')?.classList.add('offline');
+  });
 
 // Real-time listener — syncs all clients
-onValue(ref(db, '/'), snapshot => {
-  const data = snapshot.val() || {};
-  reviews = { ...BAKED_STATE, ...(data.reviews || {}) };
+onValue(
+  ref(db, '/'),
+  snapshot => {
+    const data = snapshot.val() || {};
+    reviews = { ...BAKED_STATE, ...(data.reviews || {}) };
 
-  const active = document.activeElement;
-  const typing = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT');
-  if (!typing) {
-    notes = { ...NOTES_DEFAULTS, ...(data.notes || {}) };
-    if (notesOpen) loadNotesIntoPanel();
+    const active = document.activeElement;
+    const typing = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT');
+    if (!typing) {
+      notes = { ...NOTES_DEFAULTS, ...(data.notes || {}) };
+      if (notesOpen) loadNotesIntoPanel();
+    }
+
+    document.getElementById('liveDot')?.classList.remove('offline');
+    render();
+  },
+  err => {
+    console.error('Firebase onValue failed:', err);
+    document.getElementById('liveDot')?.classList.add('offline');
+    render();
   }
-
-  document.getElementById('liveDot').classList.remove('offline');
-  render();
-});
+);
 
 // ─────────────────────────────────────────────
 // ACTIONS
@@ -929,7 +952,8 @@ function render() {
   document.getElementById('todayBadge').textContent    = newInLatest > 0 ? newInLatest + ' new' : 'done';
   document.getElementById('keepersBadge').textContent  = starred.length + maybe.length;
   document.getElementById('inreviewBadge').textContent = unreviewed.length > 0 ? unreviewed.length : '';
-  document.getElementById('archiveBadge').textContent  = allNames.length;
+  const archiveBadge = document.getElementById('archiveBadge');
+  if (archiveBadge) archiveBadge.textContent = allNames.length;
 
   renderToday(starred, maybe, latest);
   renderKeepers(starred, maybe);
