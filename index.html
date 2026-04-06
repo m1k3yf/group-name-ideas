@@ -1077,6 +1077,7 @@ let isUndoing     = false;
 let pickOrder     = loadPickOrder();
 let lastRemotePickOrderJson = JSON.stringify(pickOrder);
 let draggingPickId = null;
+let hasHydratedPickOrder = false;
 
 // Render baked-in data immediately so the UI is never blank if Firebase is slow or unavailable.
 render();
@@ -1139,7 +1140,7 @@ function syncPickOrder(picks) {
   const changed = JSON.stringify(normalized) !== JSON.stringify(pickOrder);
   pickOrder = normalized;
   savePickOrder();
-  if (changed) {
+  if (changed && hasHydratedPickOrder) {
     queueMicrotask(() => {
       const nextJson = JSON.stringify(pickOrder);
       if (nextJson !== lastRemotePickOrderJson) writePickOrder(pickOrder);
@@ -1263,6 +1264,7 @@ onValue(
     pickOrder = [...normalizedRemotePickOrder];
     savePickOrder();
     lastRemotePickOrderJson = JSON.stringify(normalizedRemotePickOrder);
+    hasHydratedPickOrder = true;
 
     const active = document.activeElement;
     const typing = active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT');
@@ -1276,6 +1278,7 @@ onValue(
   },
   err => {
     console.error('Firebase onValue failed:', err);
+    hasHydratedPickOrder = true;
     document.getElementById('liveDot')?.classList.add('offline');
     render();
   }
