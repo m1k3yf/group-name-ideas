@@ -235,6 +235,74 @@ html[data-theme='light'] .rail-orb { box-shadow: 0 0 0 10px rgba(232,133,90,.07)
 .pick-name { font-weight: 600; letter-spacing: .01em; }
 .drag-handle { opacity: .42; font-size: 12px; letter-spacing: -1px; margin-left: 2px; }
 html[data-theme='light'] .mini-btn { background: #fff; }
+.add-keeper-btn {
+  background: linear-gradient(135deg, rgba(240,194,127,.14), rgba(232,133,90,.10));
+  border: 1px dashed rgba(232,133,90,.36); color: #e8855a;
+  border-radius: 999px; padding: 8px 16px 8px 12px; font-size: 13px; font-family: inherit;
+  cursor: pointer; transition: all .18s ease; display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 600; letter-spacing: .01em;
+}
+.add-keeper-btn:hover { background: linear-gradient(135deg, rgba(240,194,127,.22), rgba(232,133,90,.16)); border-color: #e8855a; transform: translateY(-1px); }
+.add-keeper-btn .plus-icon { font-size: 16px; font-weight: 700; line-height: 1; }
+
+.add-keeper-overlay {
+  position: fixed; inset: 0; background: rgba(5,7,13,.68); backdrop-filter: blur(10px);
+  display: none; align-items: center; justify-content: center; padding: 18px; z-index: 500;
+}
+.add-keeper-overlay.open { display: flex; }
+.add-keeper-panel {
+  width: min(480px, 100%); border: 1px solid var(--border); border-radius: 24px;
+  background: var(--surface); box-shadow: 0 28px 70px rgba(0,0,0,.42); padding: 28px;
+  animation: addKeeperSlideIn .22s ease;
+}
+@keyframes addKeeperSlideIn { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.add-keeper-panel h3 {
+  font-size: 18px; font-weight: 800; letter-spacing: -.03em; margin-bottom: 6px;
+}
+.add-keeper-panel .ak-subtitle { font-size: 13px; color: var(--muted-2); margin-bottom: 22px; line-height: 1.5; }
+.ak-field { margin-bottom: 18px; }
+.ak-field label { display: block; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.ak-field input, .ak-field textarea {
+  width: 100%; background: var(--bg-body); border: 1px solid var(--border-mid); border-radius: 10px;
+  padding: 11px 14px; color: var(--text-main); font-size: 14px; font-family: inherit; outline: none;
+  transition: border-color .15s;
+}
+.ak-field input:focus, .ak-field textarea:focus { border-color: #e8855a; }
+.ak-field textarea { resize: none; font-size: 13px; }
+.ak-field input::placeholder, .ak-field textarea::placeholder { color: var(--muted-strong); }
+.ak-status-row { display: flex; gap: 10px; }
+.ak-status-opt {
+  flex: 1; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border-mid);
+  background: var(--surface-2); cursor: pointer; transition: all .15s; text-align: center;
+  font-family: inherit; font-size: 13px; color: var(--text-mid); font-weight: 500;
+}
+.ak-status-opt:hover { border-color: var(--muted-strong); background: var(--surface-hover); }
+.ak-status-opt.selected-starred { border-color: #f5a62366; background: #1c1608; color: #f5c842; }
+.ak-status-opt.selected-maybe { border-color: #6366f166; background: #141420; color: #818cf8; }
+html[data-theme='light'] .ak-status-opt.selected-starred { background: #fff4d8; border-color: #f5a62355; color: #a36a00; }
+html[data-theme='light'] .ak-status-opt.selected-maybe { background: #eef0ff; border-color: #818cf855; color: #4f46e5; }
+.ak-position-row { display: flex; align-items: center; gap: 10px; }
+.ak-position-row input[type="number"] {
+  width: 72px; text-align: center; -moz-appearance: textfield; font-weight: 700; font-size: 15px;
+}
+.ak-position-row input[type="number"]::-webkit-inner-spin-button,
+.ak-position-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.ak-position-hint { font-size: 12px; color: var(--muted-2); }
+.ak-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+.ak-btn {
+  padding: 10px 22px; border-radius: 10px; border: 1px solid var(--border-strong);
+  background: var(--surface-2); color: var(--text-mid-2); font-size: 13px; font-family: inherit;
+  cursor: pointer; transition: all .15s; font-weight: 500;
+}
+.ak-btn:hover { background: var(--surface-hover); border-color: var(--muted-strong); }
+.ak-btn.primary { background: linear-gradient(135deg, #f0c27f, #e8855a); color: #000; border: none; font-weight: 700; }
+.ak-btn.primary:hover { opacity: .9; }
+.ak-btn.primary:disabled { opacity: .4; cursor: not-allowed; }
+.ak-error { color: #ef4444; font-size: 12px; margin-top: 6px; display: none; }
+.ak-error.visible { display: block; }
+html[data-theme='light'] .add-keeper-overlay { background: rgba(15,23,42,.34); }
+html[data-theme='light'] .add-keeper-panel { box-shadow: 0 28px 70px rgba(15,23,42,.16); }
+html[data-theme='light'] .add-keeper-btn { background: linear-gradient(135deg, rgba(240,194,127,.12), rgba(232,133,90,.08)); }
 html[data-theme='light'] .pick-chip { box-shadow: 0 10px 22px rgba(15,23,42,.08); }
 html[data-theme='light'] .pick-chip:hover { box-shadow: 0 14px 26px rgba(15,23,42,.12); }
 
@@ -488,6 +556,7 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
     <div class="picks-shell">
       <div class="picks-toolbar">
         <div class="picks-hint" id="picksHint">Drag to rank your shortlist. The first pill becomes your current front-runner.</div>
+        <button class="add-keeper-btn" onclick="openAddKeeper()"><span class="plus-icon">+</span> Add Keeper</button>
         <button class="mini-btn" id="resetPicksBtn" onclick="resetPickOrder()" disabled>Reset order</button>
       </div>
       <div class="picks-strip" id="picksStrip"></div>
@@ -658,6 +727,40 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
     </div>
     <div class="modal-actions">
       <button class="btn" id="pickModalDone" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="add-keeper-overlay" id="addKeeperOverlay">
+  <div class="add-keeper-panel" id="addKeeperPanel">
+    <h3>Add a Keeper</h3>
+    <div class="ak-subtitle">Manually add a name to your shortlist. It'll show up in your picks strip and keepers tab immediately.</div>
+    <div class="ak-field">
+      <label>Name</label>
+      <input type="text" id="akName" placeholder="e.g. Marvento, Dragon River" autocomplete="off" spellcheck="false">
+      <div class="ak-error" id="akNameError">A name is required</div>
+    </div>
+    <div class="ak-field">
+      <label>Vibe note <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted-strong)">(optional)</span></label>
+      <textarea id="akVibe" rows="2" placeholder="One-line description of the energy..."></textarea>
+    </div>
+    <div class="ak-field">
+      <label>Status</label>
+      <div class="ak-status-row">
+        <button type="button" class="ak-status-opt" data-status="starred" id="akStarredBtn" onclick="window.selectAkStatus('starred')">⭐ Starred</button>
+        <button type="button" class="ak-status-opt" data-status="maybe" id="akMaybeBtn" onclick="window.selectAkStatus('maybe')">🤔 Maybe</button>
+      </div>
+    </div>
+    <div class="ak-field">
+      <label>Position in picks</label>
+      <div class="ak-position-row">
+        <input type="number" id="akPosition" min="1" value="1">
+        <span class="ak-position-hint" id="akPositionHint">of 0 current picks (or new first spot)</span>
+      </div>
+    </div>
+    <div class="ak-actions">
+      <button type="button" class="ak-btn" onclick="window.closeAddKeeper()">Cancel</button>
+      <button type="button" class="ak-btn primary" id="akSubmitBtn" onclick="window.submitAddKeeper()">Add to Picks</button>
     </div>
   </div>
 </div>
@@ -1420,6 +1523,18 @@ onValue(
     const data = snapshot.val() || {};
     reviews = { ...BAKED_STATE, ...(data.reviews || {}) };
 
+    // Hydrate custom names from Firebase
+    if (Array.isArray(data.customNames) && data.customNames.length) {
+      const batch = getCustomBatch();
+      const existingIds = new Set(batch.names.map(n => n.id));
+      data.customNames.forEach(cn => {
+        if (cn && cn.id && cn.name && !existingIds.has(cn.id)) {
+          batch.names.push({ id: cn.id, name: cn.name, vibe: cn.vibe || 'Manually added keeper' });
+          existingIds.add(cn.id);
+        }
+      });
+    }
+
     const remotePickOrder = Array.isArray(data.pickOrder) ? data.pickOrder : [];
     const normalizedRemotePickOrder = getNormalizedPickOrderForCurrentPicks(remotePickOrder);
     pickOrder = [...normalizedRemotePickOrder];
@@ -2025,6 +2140,134 @@ function exportAll() {
 }
 
 // ─────────────────────────────────────────────
+// ADD KEEPER
+// ─────────────────────────────────────────────
+let addKeeperStatus = 'starred';
+
+function getCustomBatch() {
+  let batch = BATCHES.find(b => b.id === 'custom');
+  if (!batch) {
+    batch = { id: 'custom', date: 'Custom', label: 'Manually Added', names: [] };
+    BATCHES.push(batch);
+  }
+  return batch;
+}
+
+function openAddKeeper() {
+  const overlay = document.getElementById('addKeeperOverlay');
+  if (!overlay) return;
+
+  // Reset form
+  document.getElementById('akName').value = '';
+  document.getElementById('akVibe').value = '';
+  document.getElementById('akNameError').classList.remove('visible');
+  addKeeperStatus = 'starred';
+  updateAkStatusButtons();
+
+  // Update position hint with current pick count
+  const picks = getCurrentPicksRaw();
+  const count = picks.length;
+  const posInput = document.getElementById('akPosition');
+  posInput.value = 1;
+  posInput.max = count + 1;
+  document.getElementById('akPositionHint').textContent = count > 0
+    ? `of ${count} current picks — inserts at this position`
+    : 'first in your picks list';
+
+  overlay.classList.add('open');
+  setTimeout(() => document.getElementById('akName').focus(), 60);
+}
+
+function closeAddKeeper() {
+  document.getElementById('addKeeperOverlay')?.classList.remove('open');
+}
+
+function selectAkStatus(status) {
+  addKeeperStatus = status;
+  updateAkStatusButtons();
+}
+
+function updateAkStatusButtons() {
+  const starBtn = document.getElementById('akStarredBtn');
+  const maybeBtn = document.getElementById('akMaybeBtn');
+  starBtn.className = 'ak-status-opt' + (addKeeperStatus === 'starred' ? ' selected-starred' : '');
+  maybeBtn.className = 'ak-status-opt' + (addKeeperStatus === 'maybe' ? ' selected-maybe' : '');
+}
+
+function submitAddKeeper() {
+  const nameInput = document.getElementById('akName');
+  const vibeInput = document.getElementById('akVibe');
+  const posInput = document.getElementById('akPosition');
+  const errorEl = document.getElementById('akNameError');
+
+  const name = nameInput.value.trim();
+  if (!name) {
+    errorEl.classList.add('visible');
+    nameInput.focus();
+    return;
+  }
+  errorEl.classList.remove('visible');
+
+  const vibe = vibeInput.value.trim() || 'Manually added keeper';
+  const position = Math.max(1, parseInt(posInput.value, 10) || 1);
+
+  // Generate a slug id from the name
+  const baseId = 'custom-' + name.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .substring(0, 30);
+
+  // Ensure unique id
+  const allNames = getAllNames();
+  let id = baseId;
+  let suffix = 2;
+  while (allNames.some(n => n.id === id)) {
+    id = baseId + '-' + suffix;
+    suffix++;
+  }
+
+  // Add to custom batch
+  const batch = getCustomBatch();
+  const nameObj = { id, name, vibe };
+  batch.names.push(nameObj);
+
+  // Write status to Firebase
+  reviews[id] = { status: addKeeperStatus };
+  writeReview(id, { status: addKeeperStatus });
+
+  // Insert at the specified pick position
+  const currentPicks = getCurrentPicksRaw();
+  const normalizedOrder = getNormalizedPickOrderForCurrentPicks();
+  // Position is 1-indexed, insert at position-1
+  const insertAt = Math.min(position - 1, normalizedOrder.length);
+  normalizedOrder.splice(insertAt, 0, id);
+  pickOrder = normalizedOrder;
+  writePickOrder(normalizedOrder);
+
+  // Also persist custom names to Firebase so they survive reload
+  const customNames = getCustomBatch().names.map(n => ({ id: n.id, name: n.name, vibe: n.vibe }));
+  set(ref(db, 'customNames'), customNames).catch(err => {
+    console.error('Failed to write custom names:', err);
+  });
+
+  closeAddKeeper();
+  render();
+}
+
+// Handle Escape and Enter in the modal
+document.getElementById('addKeeperPanel')?.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAddKeeper();
+  if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    submitAddKeeper();
+  }
+});
+document.getElementById('addKeeperOverlay')?.addEventListener('click', e => {
+  if (e.target.id === 'addKeeperOverlay') closeAddKeeper();
+});
+
+// ─────────────────────────────────────────────
 // EXPOSE to window for onclick handlers
 // ─────────────────────────────────────────────
 window.setStatus       = setStatus;
@@ -2036,8 +2279,12 @@ window.exportFavorites = exportFavorites;
 window.exportAll       = exportAll;
 window.exportNotes     = exportNotes;
 window.undoLastChange  = undoLastChange;
-window.toggleTheme    = toggleTheme;
-window.resetPickOrder = resetPickOrder;
+window.toggleTheme      = toggleTheme;
+window.resetPickOrder   = resetPickOrder;
+window.openAddKeeper    = openAddKeeper;
+window.closeAddKeeper   = closeAddKeeper;
+window.selectAkStatus   = selectAkStatus;
+window.submitAddKeeper  = submitAddKeeper;
 </script>
 </body>
 </html>
