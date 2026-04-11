@@ -1954,7 +1954,8 @@ function render() {
   document.getElementById('maybeBadge').textContent      = maybe.length > 0 ? maybe.length : '';
   document.getElementById('rejectedBadge').textContent   = rejected.length > 0 ? rejected.length : '';
 
-  const latest = BATCHES[BATCHES.length - 1];
+  // "latest" should always be the most recent scheduled batch, never the Custom batch
+  const latest = [...BATCHES].reverse().find(b => b.id !== 'custom') || BATCHES[BATCHES.length - 1];
   const orderedPicks = syncPickOrder([...starred, ...maybe]);
   const newInLatest = latest.names.filter(n => getStatus(n.id) === 'unreviewed').length;
   document.getElementById('todayBadge').textContent    = newInLatest > 0 ? newInLatest + ' new' : 'done';
@@ -2074,7 +2075,10 @@ function renderInReview(unreviewed) {
 function renderArchive(filter) {
   const container = document.getElementById('archiveCards');
   container.innerHTML = '';
-  [...BATCHES].reverse().forEach(batch => {
+  // Render scheduled batches first (newest first), with Custom batch separated to the bottom
+  const scheduled = BATCHES.filter(b => b.id !== 'custom');
+  const customBatch = BATCHES.find(b => b.id === 'custom');
+  [...scheduled].reverse().forEach(batch => {
     const toShow = batch.names.filter(n => filter === 'all' || getStatus(n.id) === filter);
     if (!toShow.length) return;
     const label = document.createElement('div');
@@ -2083,6 +2087,20 @@ function renderArchive(filter) {
     container.appendChild(label);
     toShow.forEach(n => container.appendChild(makeCard(n)));
   });
+  // Custom (Manually Added) keepers get their own section at the bottom
+  if (customBatch && customBatch.names.length) {
+    const toShow = customBatch.names.filter(n => filter === 'all' || getStatus(n.id) === filter);
+    if (toShow.length) {
+      const divider = document.createElement('div');
+      divider.className = 'batch-label';
+      divider.style.marginTop = '24px';
+      divider.style.borderTop = '1px solid var(--border, #e5e5e5)';
+      divider.style.paddingTop = '16px';
+      divider.textContent = '✨ Custom — Manually Added Keepers';
+      container.appendChild(divider);
+      toShow.forEach(n => container.appendChild(makeCard(n)));
+    }
+  }
   if (!container.children.length) {
     container.innerHTML = '<div class="empty-state">No names match this filter</div>';
   }
