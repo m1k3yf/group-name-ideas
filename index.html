@@ -1743,6 +1743,12 @@ const BATCHES = [
       {id:"cimascuro",    name:"CIMASCURO",    vibe:'[MIX] cima + scuro — dark peak. Sounds 100% naturally born Italian, the summit at midnight'},
       {id:"venomvolta",   name:"VENOMVOLTA",   vibe:'[MIX] venom + volta — venom turn. The toxic pivot, English bite meets Italian electric motion'},
     ]
+  },
+  {
+    id:"custom", date:"Custom", label:"Manually Added",
+    names:[
+      {id:"custom-good-guai", name:"GOOD GUAI", vibe:'[BILINGUAL PUN] Sounds like "good guy" / means "good troubles" — sharp clever pun, not a portmanteau, GUAI cluster anchor'},
+    ]
   }
 ];
 
@@ -1823,6 +1829,23 @@ const BAKED_STATE = {
   "dragon-river":{status:"maybe"},
   "per-la-vita": {status:"maybe"},
   "marvento":    {status:"maybe"},
+  "custom-good-guai": {status:"starred"},
+  // ── Spotify-verified taken (Batch 37) ──
+  "ira":         {status:"rejected", note:"Spotify: multiple artists incl. Polish rock band IRA"},
+  "botta":       {status:"rejected", note:"Spotify: multiple BOTTA / Botta artists"},
+  "cima":        {status:"rejected", note:"Spotify: exact match CIMA + Cimafunk + La Cima"},
+  "rito":        {status:"rejected", note:"Spotify: two separate exact-match RITO artists"},
+  "scia":        {status:"rejected", note:"Spotify: close artist Sciahri + crowded namespace"},
+  "tammorra":    {status:"rejected", note:"Spotify: exact match Tammorra + folk-tradition acts"},
+  "silk":        {status:"rejected", note:"Spotify: multiple Silk artists incl. iconic 90s R&B group"},
+  "aura":        {status:"rejected", note:"Spotify: exact match AURA + many variants"},
+  "hustle":      {status:"rejected", note:"Spotify: exact match Hustle + Nipsey Hussle adjacency"},
+  "temple":      {status:"rejected", note:"Spotify: exact match TEMPLE + Temple Of The Dog"},
+  "venom":       {status:"rejected", note:"Spotify: three separate exact-match VENOM artists"},
+  "stoic":       {status:"rejected", note:"Spotify: three exact-match STOIC artists"},
+  // ── Spotify-verified taken (Batch 36) ──
+  "strale":      {status:"rejected", note:"Spotify: Stråle (Norwegian/Swedish artist)"},
+  "orda":        {status:"rejected", note:"Spotify: exact match ORDA artist"},
 };
 
 // ─────────────────────────────────────────────
@@ -2352,7 +2375,28 @@ onValue(
     }
 
     const remotePickOrder = Array.isArray(data.pickOrder) ? data.pickOrder : [];
-    const normalizedRemotePickOrder = getNormalizedPickOrderForCurrentPicks(remotePickOrder);
+    let normalizedRemotePickOrder = getNormalizedPickOrderForCurrentPicks(remotePickOrder);
+
+    // ── One-shot migration: place GOOD GUAI right after DRAGON RIVER ──
+    // Runs once per device when GOOD GUAI is starred but not adjacent to Dragon River.
+    // Marker stored in localStorage to prevent re-runs.
+    const GOOD_GUAI_MIGRATION_KEY = 'good-guai-pos2-migration-v1';
+    if (!localStorage.getItem(GOOD_GUAI_MIGRATION_KEY)) {
+      const ggIdx = normalizedRemotePickOrder.indexOf('custom-good-guai');
+      const drIdx = normalizedRemotePickOrder.indexOf('dragon-river');
+      if (ggIdx !== -1 && drIdx !== -1 && ggIdx !== drIdx + 1) {
+        const reordered = normalizedRemotePickOrder.filter(id => id !== 'custom-good-guai');
+        const newDrIdx = reordered.indexOf('dragon-river');
+        reordered.splice(newDrIdx + 1, 0, 'custom-good-guai');
+        normalizedRemotePickOrder = reordered;
+        // Persist to Firebase so it propagates across devices
+        set(ref(db, 'pickOrder'), reordered).catch(err => {
+          console.error('Failed to write GOOD GUAI migration pickOrder:', err);
+        });
+      }
+      localStorage.setItem(GOOD_GUAI_MIGRATION_KEY, '1');
+    }
+
     pickOrder = [...normalizedRemotePickOrder];
     savePickOrder();
     lastRemotePickOrderJson = JSON.stringify(normalizedRemotePickOrder);
