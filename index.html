@@ -1927,6 +1927,19 @@ const BAKED_STATE = {
   "vanto":       {status:"rejected", note:"Spotify: exact match Vanto"},
   "spire":       {status:"rejected", note:"Spotify: exact match Spire"},
   "hearth":      {status:"rejected", note:"Spotify: two exact-match Hearth artists"},
+  // ── Spotify-verified taken (Batch 40) ──
+  "sbarco":      {status:"rejected", note:"Spotify: multiple Sbarco artists exact match"},
+  "schiaffo":    {status:"rejected", note:"Spotify: two exact-match Schiaffo artists + Schiaffo Al Re"},
+  "rima":        {status:"rejected", note:"Spotify: exact match Rima + crowded namespace"},
+  "astro":       {status:"rejected", note:"Spotify: multiple ASTRO/Astro artists incl. K-pop boy band"},
+  "taranta":     {status:"rejected", note:"Spotify: exact match Taranta + Taranta Nova + Aratos Taranta"},
+  "intrigo":     {status:"rejected", note:"Spotify: two exact-match Intrigo artists"},
+  "bravado":     {status:"rejected", note:"Spotify: three exact-match Bravado artists"},
+  "marquee":     {status:"rejected", note:"Spotify: two exact-match Marquee artists"},
+  "salvo":       {status:"rejected", note:"Spotify: four exact-match Salvo artists"},
+  "rhapsody":    {status:"rejected", note:"Spotify: multiple Rhapsody artists + Rhapsody Of Fire metal band"},
+  "keystone":    {status:"rejected", note:"Spotify: five+ exact-match Keystone artists"},
+  "tarantanova": {status:"rejected", note:"Spotify: Tarantanovasound + Tarantanova dello Stretto + Taranta Nova"},
 };
 
 // ─────────────────────────────────────────────
@@ -2509,6 +2522,11 @@ function setStatus(id, newStatus) {
   const next = cur === newStatus ? 'unreviewed' : newStatus;
   if (cur === next) return;
   pushHistory({ type: 'review', label: 'status change', id, previous: { status: cur } });
+  // Optimistic local update — UI reflects the click immediately,
+  // even if Firebase write is slow/blocked. onValue listener will
+  // reconcile when the write succeeds.
+  reviews[id] = { ...(reviews[id] || {}), status: next };
+  render();
   writeReview(id, { status: next });
 }
 function setNameNote(id, val) {
@@ -2516,6 +2534,9 @@ function setNameNote(id, val) {
   const nextNote = val.trim();
   if (previousNote === nextNote) return;
   pushHistory({ type: 'review', label: 'note edit', id, previous: { note: previousNote } });
+  // Optimistic local update
+  reviews[id] = { ...(reviews[id] || {}), note: nextNote };
+  render();
   writeReview(id, { note: nextNote });
 }
 
