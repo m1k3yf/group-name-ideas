@@ -527,6 +527,13 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
 .mk-poster-img {
   display: block; width: 100%; max-width: 720px; height: auto;
 }
+.mk-poster-pair {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;
+}
+.mk-poster-pair .mk-poster-img-wrap { margin-top: 0; }
+@media (max-width: 640px) {
+  .mk-poster-pair { grid-template-columns: 1fr; }
+}
 .mockup-verdict {
   margin-top: 40px; padding: 24px 28px; border-radius: 12px;
   background: var(--surface); border: 1px solid var(--border-soft);
@@ -928,13 +935,28 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
     </div>
     <div class="mk-cap">GOOD GUAI &middot; same tier in the same lineup</div>
 
-    <div class="mockup-section-label" style="margin-top:42px;">Concept posters · integrated identity</div>
-    <div class="mockup-intro" style="margin-top:0;">Where it all comes together: <strong>GOOD GUAI</strong> as the name, <strong>PER LA VITA</strong> as the tagline, the <strong>DRAGHÌ</strong> dragon as the mark, <strong>Volturara Irpina</strong> as the origin. One identity, every element earning its place.</div>
+    <div class="mockup-section-label" style="margin-top:42px;">Concept posters · the campaign pair</div>
+    <div class="mockup-intro" style="margin-top:0;">One brand world, two registers. <strong>GOOD GUAI</strong> is the daylight, brotherhood, "trouble for the right reasons" register. <strong>DRAGHÌ</strong> is the dusk, mythic, "sangue · fuoco · vita" register. The shared elements — <strong>PER LA VITA</strong> tagline, dragon crest, Volturara Irpina origin — tie them into the same family.</div>
 
     <div class="mk-poster-img-wrap">
-      <img src="./posters/good-guai-volturara.jpg" alt="GOOD GUAI · PER LA VITA · Volturara Irpina concept poster" class="mk-poster-img" loading="lazy" />
+      <img src="./posters/side-by-side-posters.png" alt="DRAGHÌ and GOOD GUAI campaign diptych showing both posters side by side" class="mk-poster-img" loading="lazy" />
     </div>
-    <div class="mk-cap">Summer event &middot; Volturara Irpina &middot; July 29, 2026</div>
+    <div class="mk-cap">Campaign diptych &middot; both registers, one identity</div>
+
+    <div class="mk-poster-pair">
+      <div>
+        <div class="mk-poster-img-wrap">
+          <img src="./posters/good-guai-poster-volt.png" alt="GOOD GUAI · Volturara Irpina summer event poster" class="mk-poster-img" loading="lazy" />
+        </div>
+        <div class="mk-cap">GOOD GUAI &middot; Volturara summer event</div>
+      </div>
+      <div>
+        <div class="mk-poster-img-wrap">
+          <img src="./posters/GRAGHI.png" alt="DRAGHÌ · debut tour poster" class="mk-poster-img" loading="lazy" />
+        </div>
+        <div class="mk-cap">DRAGHÌ &middot; debut tour</div>
+      </div>
+    </div>
 
     <div class="mockup-verdict">
       <div class="mockup-verdict-label">After the stress tests</div>
