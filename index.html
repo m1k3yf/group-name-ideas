@@ -442,6 +442,101 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
 }
 .batch-label:first-child { margin-top: 4px; }
 
+/* ── Mockups panel ── */
+.mockup-intro {
+  font-size: 14px; line-height: 1.7; color: var(--text-soft-3);
+  margin: 4px 0 28px; max-width: 640px;
+}
+.mockup-intro strong { color: var(--text-main); font-weight: 600; }
+.mockup-section-label {
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted-strong); font-weight: 600;
+  margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--surface-2);
+}
+.mk-grid-3x2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.mk-tile {
+  border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--border-soft);
+}
+.mk-lbl { font-family: -apple-system,'Inter',sans-serif; letter-spacing: 0.28em; opacity: 0.55; }
+.mk-cap {
+  font-size: 12px; color: var(--muted-2); margin: 8px 0 0;
+  text-align: center; letter-spacing: 0.02em;
+}
+.mk-spotify {
+  border-radius: 12px; overflow: hidden; border: 1px solid var(--border-soft);
+  padding: 30px 28px 26px; display: flex; flex-direction: column;
+  justify-content: flex-end; min-height: 300px; margin-top: 16px;
+}
+.mk-verified { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+.mk-check {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%; background: #4FB3F7;
+  color: #fff; font-size: 11px; font-weight: 700;
+}
+.mk-spotify-name { line-height: 0.92; margin: 14px 0 20px; }
+.mk-spotify-monthly { font-size: 14px; font-weight: 500; opacity: 0.92; margin-bottom: 16px; }
+.mk-spotify-pills { margin-bottom: 22px; }
+.mk-pill {
+  display: inline-block; font-size: 11px; padding: 4px 11px;
+  border-radius: 999px; margin-right: 6px; letter-spacing: 0.02em;
+}
+.mk-pill-warm { background: rgba(244,235,225,0.08); color: rgba(244,235,225,0.78); }
+.mk-pill-cool { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.78); }
+.mk-spotify-actions { display: flex; align-items: center; gap: 14px; }
+.mk-play {
+  background: #1ED760; color: #0a0a0a; border: none;
+  border-radius: 999px; padding: 9px 22px; font-size: 13px;
+  font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.mk-follow {
+  background: transparent; border: 1px solid; border-radius: 999px;
+  padding: 8px 20px; font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: inherit;
+}
+.mk-dots { font-size: 20px; opacity: 0.7; letter-spacing: 2px; }
+.mk-poster {
+  border-radius: 12px; overflow: hidden; border: 1px solid var(--border-soft);
+  padding: 38px 28px 34px; text-align: center;
+  background: #0f0d0a; color: #f4ede0; margin-top: 16px;
+}
+.mk-poster-strip { font-size: 11px; letter-spacing: 0.35em; opacity: 0.55; }
+.mk-poster-fest {
+  font-family: Georgia, serif; font-size: 58px; font-weight: 500;
+  letter-spacing: 0.02em; line-height: 1; margin: 14px 0 6px; color: #E8826A;
+}
+.mk-poster-divider {
+  width: 32px; height: 1px; background: rgba(244,237,224,0.3);
+  margin: 18px auto;
+}
+.mk-tier {
+  margin: 16px 0; letter-spacing: 0.04em; font-weight: 500; line-height: 1.4;
+}
+.mk-t1 { font-size: 26px; letter-spacing: 0.02em; }
+.mk-t2 { font-size: 16px; }
+.mk-t3 { font-size: 13px; line-height: 1.7; }
+.mk-t3 strong { font-weight: 700; }
+.mk-t4 { font-size: 11px; line-height: 1.8; opacity: 0.7; font-weight: 400; }
+.mockup-verdict {
+  margin-top: 40px; padding: 24px 28px; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--border-soft);
+}
+.mockup-verdict-label {
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted-strong); font-weight: 600; margin-bottom: 12px;
+}
+.mockup-verdict-body { font-size: 14px; line-height: 1.7; color: var(--text-soft-3); }
+.mockup-verdict-body strong { color: var(--text-main); font-weight: 600; }
+@media (max-width: 640px) {
+  .mk-grid-3x2 { grid-template-columns: 1fr; }
+  .mk-spotify-name { font-size: 72px !important; }
+  .mk-poster-fest { font-size: 40px; }
+  .mk-t1 { font-size: 18px; }
+  .mk-t2 { font-size: 13px; }
+}
+
 .notes-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 300;
   opacity: 0; pointer-events: none; transition: opacity .2s;
@@ -635,6 +730,7 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
     <button class="tab" data-tab="keepers">Keepers <span class="badge" id="keepersBadge"></span></button>
     <button class="tab" data-tab="inreview">In Review <span class="badge" id="inreviewBadge"></span></button>
     <button class="tab" data-tab="archive">Archive <span class="badge" id="archiveBadge"></span></button>
+    <button class="tab" data-tab="mockups">Mockups <span class="badge" id="mockupsBadge">2</span></button>
   </div>
 </div>
 
@@ -675,6 +771,159 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
       <button class="af-btn" data-af="rejected">Rejected <span class="badge" id="rejectedBadge"></span></button>
     </div>
     <div id="archiveCards"></div>
+  </div>
+  <div class="tab-panel" id="panel-mockups">
+    <div class="today-header">Top picks · brand stress tests</div>
+    <div class="mockup-intro">A real name has to work as a logo on a marquee, an album cover, a Spotify header, and a festival lineup. Below: <strong>DRAGHÌ</strong> and <strong>GOOD GUAI</strong> tested across all four.</div>
+
+    <div class="mockup-section-label">Marquee · EP artwork · Tour flyer</div>
+    <div class="mk-grid-3x2">
+      <div>
+        <div class="mk-tile" style="background:#15110d;color:#f4ebe1;padding:22px 18px;font-family:Georgia,serif;text-align:center;">
+          <div class="mk-lbl" style="font-size:11px;">BOWERY BALLROOM &middot; NYC</div>
+          <div class="mk-lbl" style="font-size:11px;margin-top:3px;">SAT &middot; NOV 14</div>
+          <div style="font-size:54px;font-weight:500;letter-spacing:0.03em;margin:18px 0 8px;line-height:1;">DRAGHÌ</div>
+          <div class="mk-lbl" style="font-size:11px;">W/ MARVENTO &middot; DUSK</div>
+        </div>
+        <div class="mk-cap">Marquee &middot; NYC</div>
+      </div>
+      <div>
+        <div class="mk-tile" style="background:#0a0a0a;color:#fff;padding:22px 18px;text-align:center;">
+          <div class="mk-lbl" style="font-size:11px;">BOWERY BALLROOM &middot; NYC</div>
+          <div class="mk-lbl" style="font-size:11px;margin-top:3px;">SAT &middot; NOV 14</div>
+          <div style="font-size:48px;font-weight:500;letter-spacing:-0.025em;margin:18px 0 8px;line-height:1;">GOOD&nbsp;GUAI</div>
+          <div class="mk-lbl" style="font-size:11px;">W/ MARVENTO &middot; DUSK</div>
+        </div>
+        <div class="mk-cap">Marquee &middot; NYC</div>
+      </div>
+      <div>
+        <div class="mk-tile" style="background:#1a110a;aspect-ratio:1/1;display:flex;flex-direction:column;justify-content:space-between;padding:20px;color:#f4ebe1;">
+          <div class="mk-lbl" style="font-size:11px;">DRAGHÌ &middot; EP 01</div>
+          <div style="font-family:Georgia,serif;font-size:78px;font-weight:500;letter-spacing:0.03em;line-height:0.9;">DRAGHÌ</div>
+          <div class="mk-lbl" style="font-size:11px;text-align:right;">PER LA VITA</div>
+        </div>
+        <div class="mk-cap">EP artwork</div>
+      </div>
+      <div>
+        <div class="mk-tile" style="background:#0a0a0a;aspect-ratio:1/1;display:flex;flex-direction:column;justify-content:space-between;padding:20px;color:#fff;">
+          <div class="mk-lbl" style="font-size:11px;">GOOD GUAI &middot; EP 01</div>
+          <div style="font-size:62px;font-weight:500;letter-spacing:-0.035em;line-height:0.88;">GOOD<br/>GUAI</div>
+          <div class="mk-lbl" style="font-size:11px;text-align:right;">NEW YORK CITY</div>
+        </div>
+        <div class="mk-cap">EP artwork</div>
+      </div>
+      <div>
+        <div class="mk-tile" style="background:#16100a;aspect-ratio:3/4;display:flex;flex-direction:column;justify-content:space-between;padding:20px;color:#f4ebe1;font-family:Georgia,serif;">
+          <div>
+            <div class="mk-lbl" style="font-size:11px;">EAST COAST TOUR &middot; MMXXVI</div>
+            <div style="font-size:52px;font-weight:500;letter-spacing:0.03em;line-height:0.95;margin-top:16px;">DRAGHÌ</div>
+            <div class="mk-lbl" style="font-size:11px;margin-top:8px;">PER LA VITA TOUR</div>
+          </div>
+          <div style="font-size:11px;line-height:2;opacity:0.78;font-family:inherit;letter-spacing:0.04em;">
+            NOV 12 &middot; PHILADELPHIA &middot; UNION TRANSFER<br/>
+            NOV 14 &middot; NEW YORK &middot; BOWERY BALLROOM<br/>
+            NOV 15 &middot; BROOKLYN &middot; MUSIC HALL<br/>
+            NOV 18 &middot; BOSTON &middot; ROYALE<br/>
+            NOV 20 &middot; WASHINGTON &middot; 9:30 CLUB
+          </div>
+        </div>
+        <div class="mk-cap">Tour flyer</div>
+      </div>
+      <div>
+        <div class="mk-tile" style="background:#0a0a0a;aspect-ratio:3/4;display:flex;flex-direction:column;justify-content:space-between;padding:20px;color:#fff;">
+          <div>
+            <div class="mk-lbl" style="font-size:11px;">EAST COAST TOUR &middot; 2026</div>
+            <div style="font-size:50px;font-weight:500;letter-spacing:-0.035em;line-height:0.92;margin-top:16px;">GOOD<br/>GUAI</div>
+            <div class="mk-lbl" style="font-size:11px;margin-top:8px;">FIRST RUN — SOLD OUT</div>
+          </div>
+          <div style="font-size:11px;line-height:2;opacity:0.78;letter-spacing:0.04em;">
+            NOV 12 &middot; PHILADELPHIA &middot; UNION TRANSFER<br/>
+            NOV 14 &middot; NEW YORK &middot; BOWERY BALLROOM<br/>
+            NOV 15 &middot; BROOKLYN &middot; MUSIC HALL<br/>
+            NOV 18 &middot; BOSTON &middot; ROYALE<br/>
+            NOV 20 &middot; WASHINGTON &middot; 9:30 CLUB
+          </div>
+        </div>
+        <div class="mk-cap">Tour flyer</div>
+      </div>
+    </div>
+
+    <div class="mockup-section-label" style="margin-top:42px;">Spotify artist page</div>
+
+    <div class="mk-spotify" style="background:#1a110a;color:#f4ebe1;">
+      <div class="mk-verified">
+        <span class="mk-check">✓</span>
+        <span>Verified Artist</span>
+      </div>
+      <div class="mk-spotify-name" style="font-family:Georgia,serif;font-size:124px;font-weight:500;letter-spacing:0.02em;">DRAGHÌ</div>
+      <div class="mk-spotify-monthly">2,847,392 monthly listeners</div>
+      <div class="mk-spotify-pills">
+        <span class="mk-pill mk-pill-warm">New York</span>
+        <span class="mk-pill mk-pill-warm">Brooklyn</span>
+        <span class="mk-pill mk-pill-warm">Napoli</span>
+        <span class="mk-pill mk-pill-warm">Milano</span>
+        <span class="mk-pill mk-pill-warm">Boston</span>
+      </div>
+      <div class="mk-spotify-actions">
+        <button class="mk-play">▶ Play</button>
+        <button class="mk-follow" style="color:#f4ebe1;border-color:rgba(244,235,225,0.4);">Following</button>
+        <span class="mk-dots" style="color:rgba(244,235,225,0.65);">···</span>
+      </div>
+    </div>
+    <div class="mk-cap">DRAGHÌ &middot; Spotify artist page</div>
+
+    <div class="mk-spotify" style="background:#0a0a0a;color:#fff;">
+      <div class="mk-verified">
+        <span class="mk-check">✓</span>
+        <span>Verified Artist</span>
+      </div>
+      <div class="mk-spotify-name" style="font-size:108px;font-weight:500;letter-spacing:-0.035em;">GOOD&nbsp;GUAI</div>
+      <div class="mk-spotify-monthly">2,318,847 monthly listeners</div>
+      <div class="mk-spotify-pills">
+        <span class="mk-pill mk-pill-cool">New York</span>
+        <span class="mk-pill mk-pill-cool">Brooklyn</span>
+        <span class="mk-pill mk-pill-cool">Newark</span>
+        <span class="mk-pill mk-pill-cool">Boston</span>
+        <span class="mk-pill mk-pill-cool">Philadelphia</span>
+      </div>
+      <div class="mk-spotify-actions">
+        <button class="mk-play">▶ Play</button>
+        <button class="mk-follow" style="color:#fff;border-color:rgba(255,255,255,0.4);">Following</button>
+        <span class="mk-dots" style="color:rgba(255,255,255,0.65);">···</span>
+      </div>
+    </div>
+    <div class="mk-cap">GOOD GUAI &middot; Spotify artist page</div>
+
+    <div class="mockup-section-label" style="margin-top:42px;">Governors Ball festival lineup</div>
+
+    <div class="mk-poster">
+      <div class="mk-poster-strip">JUNE 5–7, 2026 &middot; RANDALL'S ISLAND &middot; NEW YORK CITY</div>
+      <div class="mk-poster-fest">GOVERNORS BALL</div>
+      <div class="mk-poster-strip" style="opacity:0.45;">PRESENTED BY FOUNDERS FEDERAL</div>
+      <div class="mk-poster-divider"></div>
+      <div class="mk-tier mk-t1">TAME IMPALA &middot; ROSALÍA &middot; TYLER, THE CREATOR</div>
+      <div class="mk-tier mk-t2">MÅNESKIN &middot; CHARLI XCX &middot; SZA &middot; KAYTRANADA &middot; PHOEBE BRIDGERS</div>
+      <div class="mk-tier mk-t3">BLOND:ISH &middot; CIGARETTES AFTER SEX &middot; <strong>DRAGHÌ</strong> &middot; FAYE WEBSTER &middot; FRED AGAIN.. &middot; JPEGMAFIA &middot; LAUFEY &middot; MK.GEE &middot; PINKPANTHERESS &middot; THE WAR ON DRUGS</div>
+      <div class="mk-tier mk-t4">BEABADOOBEE &middot; COCO &amp; CLAIR CLAIR &middot; DOMI &amp; JD BECK &middot; EARL SWEATSHIRT &middot; GENESIS OWUSU &middot; JESSIE WARE &middot; NAVY BLUE &middot; OVERMONO &middot; ROMY &middot; SAYA GRAY &middot; SHYGIRL &middot; SUKI WATERHOUSE &middot; YAYA BEY</div>
+    </div>
+    <div class="mk-cap">DRAGHÌ &middot; tier three of the Gov Ball lineup</div>
+
+    <div class="mk-poster">
+      <div class="mk-poster-strip">JUNE 5–7, 2026 &middot; RANDALL'S ISLAND &middot; NEW YORK CITY</div>
+      <div class="mk-poster-fest">GOVERNORS BALL</div>
+      <div class="mk-poster-strip" style="opacity:0.45;">PRESENTED BY FOUNDERS FEDERAL</div>
+      <div class="mk-poster-divider"></div>
+      <div class="mk-tier mk-t1">TAME IMPALA &middot; ROSALÍA &middot; TYLER, THE CREATOR</div>
+      <div class="mk-tier mk-t2">MÅNESKIN &middot; CHARLI XCX &middot; SZA &middot; KAYTRANADA &middot; PHOEBE BRIDGERS</div>
+      <div class="mk-tier mk-t3">BLOND:ISH &middot; CIGARETTES AFTER SEX &middot; FAYE WEBSTER &middot; FRED AGAIN.. &middot; <strong>GOOD GUAI</strong> &middot; JPEGMAFIA &middot; LAUFEY &middot; MK.GEE &middot; PINKPANTHERESS &middot; THE WAR ON DRUGS</div>
+      <div class="mk-tier mk-t4">BEABADOOBEE &middot; COCO &amp; CLAIR CLAIR &middot; DOMI &amp; JD BECK &middot; EARL SWEATSHIRT &middot; GENESIS OWUSU &middot; JESSIE WARE &middot; NAVY BLUE &middot; OVERMONO &middot; ROMY &middot; SAYA GRAY &middot; SHYGIRL &middot; SUKI WATERHOUSE &middot; YAYA BEY</div>
+    </div>
+    <div class="mk-cap">GOOD GUAI &middot; same tier in the same lineup</div>
+
+    <div class="mockup-verdict">
+      <div class="mockup-verdict-label">After the stress tests</div>
+      <div class="mockup-verdict-body"><strong>DRAGHÌ</strong> scales into headliner trajectory more naturally — the serif at marquee size feels inevitable, the Spotify header commands the space, and on the festival poster it sits comfortably between MÅNESKIN and ROSALÍA, names that already broke globally with the same accent trick. <strong>GOOD GUAI</strong> peaks beautifully at single-EP and club-poster scale but feels smaller in festival context. Recommendation: <strong>DRAGHÌ as the name, PER LA VITA as the motto / debut album / tour name.</strong></div>
+    </div>
   </div>
 </div>
 <aside class="insight-rail" aria-label="Name review insights">
