@@ -1,0 +1,6 @@
+.DS_Store
+test_outside_git
+Fiume_Brothers_Name_Decision_Worksheet.docx
+*.bak
+*.swp
+.git/HEAD.lock*

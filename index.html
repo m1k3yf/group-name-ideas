@@ -1163,6 +1163,7 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
 import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, set, update, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 import { getAnalytics }                           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 // ─────────────────────────────────────────────
 // FIREBASE
@@ -1179,6 +1180,20 @@ const app = initializeApp({
 });
 const db = getDatabase(app);
 try { getAnalytics(app); } catch(_) {}
+
+// ─────────────────────────────────────────────
+// AUTH — anonymous sign-in so security rules can require auth != null
+// ─────────────────────────────────────────────
+const auth = getAuth(app);
+const authReady = new Promise(resolve => {
+  onAuthStateChanged(auth, user => {
+    if (user) resolve(user);
+  });
+  signInAnonymously(auth).catch(err => {
+    console.error('Anonymous sign-in failed:', err);
+    document.getElementById('liveDot')?.classList.add('offline');
+  });
+});
 
 // ─────────────────────────────────────────────
 // BATCHES — all name data
@@ -2451,6 +2466,29 @@ const BATCHES = [
     ]
   },
   {
+    id:"b56", date:"May 22", label:"Batch 56 — Raw Nouns, Dialect & Bilingual Coins",
+    names:[
+      {id:"timbro",         name:"TIMBRO",         vibe:'[IT] "Timbre/stamp" — 2 syl, the literal Italian word for sonic character, music-coded by definition, marquee-sharp'},
+      {id:"raduno",         name:"RADUNO",         vibe:'[IT] "Gathering/rally" — 3 syl, group-coded right in the noun, what every Italian-American family does on Sunday, processione energy'},
+      {id:"pacchia",        name:"PACCHIA",        vibe:'[IT] Neapolitan dialect — "The good life / sweet gig." 2 syl, double-C punch, what Southern Italians say when life is easy, grown & sexy'},
+      {id:"vetta",          name:"VETTA",          vibe:'[IT] "Peak/summit" — 2 syl, double-T punch, sharp marquee silhouette, the top reached without "kings" pattern'},
+      {id:"marea",          name:"MAREA",          vibe:'[IT] "Tide" — 3 syl, atmospheric Atlantic crossing coded, the rhythm that pulls between two shores'},
+      {id:"rovere",         name:"ROVERE",         vibe:'[IT] "Oak tree" — 3 syl, Southern Italian hardwood, rooted by definition, sounds expensive and weathered'},
+      {id:"empire",         name:"EMPIRE",         vibe:'[EN] 2 syl — NYC built-in (Empire State), grand marquee weight without "kings" pattern, classic dynasty register'},
+      {id:"gavel",          name:"GAVEL",          vibe:'[EN] 2 syl — the sound of authority landing, hip-hop register decision-maker, the strike that settles it'},
+      {id:"scribe",         name:"SCRIBE",         vibe:'[EN] 1 syl — keeper of the record, the one who writes the lineage down, marquee-clean and grown'},
+      {id:"opal",           name:"OPAL",           vibe:'[EN] 2 syl — iridescent gem, R&B grown & sexy luxe register, the stone that shifts color in different light'},
+      {id:"paragon",        name:"PARAGON",        vibe:'[EN] 3 syl — model of excellence, hip-hop confidence without bragging, sounds Italian-adjacent (paragone)'},
+      {id:"ridge",          name:"RIDGE",          vibe:'[EN] 1 syl — NYC borough-coded elevation, the high line crew walks, sharp single-syl marquee punch'},
+      {id:"timbronotte",    name:"TIMBRONOTTE",    vibe:'[MIX] timbro + notte — night timbre. Italian sonic character meets iconic Italian dark, the voice that owns midnight'},
+      {id:"vettavolta",     name:"VETTAVOLTA",     vibe:'[MIX] vetta + volta — peak turn. Italian summit meets electric pivot, kinetic marquee energy, sounds naturally born Italian'},
+      {id:"mareafuoco",     name:"MAREAFUOCO",     vibe:'[MIX] marea + fuoco — tide fire. Atlantic rhythm meets Italian flame, the burn that crosses the water'},
+      {id:"empirevita",     name:"EMPIREVITA",     vibe:'[MIX] empire + vita — empire life. NYC dynasty meets Italian soul, grand marquee declaration bilingual'},
+      {id:"opalfiero",      name:"OPALFIERO",      vibe:'[MIX] opal + fiero — proud opal. English iridescent gem meets Italian confidence, R&B luxe bilingual'},
+      {id:"ridgenotte",     name:"RIDGENOTTE",     vibe:'[MIX] ridge + notte — night ridge. NYC elevation meets Italian dark, the high line walked after hours'},
+    ]
+  },
+  {
     id:"custom", date:"Custom", label:"Manually Added",
     names:[
       {id:"custom-good-guai", name:"GOOD GUAI", vibe:'[BILINGUAL PUN] Sounds like "good guy" / means "good troubles" — sharp clever pun, not a portmanteau, GUAI cluster anchor'},
@@ -3076,15 +3114,17 @@ function undoLastChange() {
   }, 0);
 }
 
-// Seed Firebase on very first load
-get(ref(db, 'reviews'))
-  .then(snap => {
-    if (!snap.exists()) return set(ref(db, 'reviews'), BAKED_STATE);
-  })
-  .catch(err => {
-    console.error('Firebase seed check failed:', err);
-    document.getElementById('liveDot')?.classList.add('offline');
-  });
+// Seed Firebase on very first load — wait for auth so rules pass
+authReady.then(() =>
+  get(ref(db, 'reviews'))
+    .then(snap => {
+      if (!snap.exists()) return set(ref(db, 'reviews'), BAKED_STATE);
+    })
+    .catch(err => {
+      console.error('Firebase seed check failed:', err);
+      document.getElementById('liveDot')?.classList.add('offline');
+    })
+);
 
 // Real-time listener — syncs all clients
 onValue(

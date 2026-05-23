@@ -1,0 +1,46 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "reviews": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$nameId": {
+        ".validate": "newData.hasChildren(['status']) && newData.child('status').isString() && newData.child('status').val().length < 50",
+        "status": { ".validate": true },
+        "note":   { ".validate": "newData.isString() && newData.val().length < 5000" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "notes": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".validate": "newData.hasChildren() || !newData.exists()",
+      "$field": {
+        ".validate": "newData.isString() && newData.val().length < 20000"
+      }
+    },
+
+    "customNames": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$index": {
+        ".validate": "newData.hasChildren(['id','name'])",
+        "id":   { ".validate": "newData.isString() && newData.val().length < 100" },
+        "name": { ".validate": "newData.isString() && newData.val().length < 100" },
+        "vibe": { ".validate": "newData.isString() && newData.val().length < 1000" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "pickOrder": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$index": {
+        ".validate": "newData.isString() && newData.val().length < 100"
+      }
+    }
+  }
+}
