@@ -244,6 +244,12 @@ html[data-theme='light'] .rail-orb { box-shadow: 0 0 0 10px rgba(232,133,90,.07)
 }
 .pick-chip.is-top-pick .pick-rank { background: rgba(232,133,90,.2); }
 .pick-chip .chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+/* Top 3 picks = gold, rest = purple. Color tracks rank, not starred/maybe status. */
+.pick-chip.rank-top  { background: #1c1608; border-color: #f5a62333; color: #f5c842; }
+.pick-chip.rank-rest { background: #141420; border-color: #6366f133; color: #818cf8; }
+.pick-chip.rank-top  .chip-dot { background: #f5a623; }
+.pick-chip.rank-rest .chip-dot { background: #6366f1; }
+/* Legacy status classes kept for any other consumers */
 .pick-chip.starred { background: #1c1608; border-color: #f5a62333; color: #f5c842; }
 .pick-chip.maybe   { background: #141420; border-color: #6366f133; color: #818cf8; }
 .pick-chip.starred .chip-dot { background: #f5a623; }
@@ -332,6 +338,8 @@ html[data-theme='light'] .pick-chip:hover { box-shadow: 0 14px 26px rgba(15,23,4
 .name-card.is-maybe   { border-color: #6366f122; background: #111128; }
 .name-card.is-rejected { opacity: .28; }
 .name-card.is-rejected .name-label { text-decoration: line-through; }
+html[data-theme='light'] .pick-chip.rank-top  { background: #fff4d8; border-color: #f5a62355; color: #a36a00; }
+html[data-theme='light'] .pick-chip.rank-rest { background: #eef0ff; border-color: #818cf855; color: #4f46e5; }
 html[data-theme='light'] .pick-chip.starred { background: #fff4d8; border-color: #f5a62355; color: #a36a00; }
 html[data-theme='light'] .pick-chip.maybe   { background: #eef0ff; border-color: #818cf855; color: #4f46e5; }
 .modal-backdrop {
@@ -3637,11 +3645,11 @@ function renderToday(starred, maybe, latest, orderedPicks = null) {
   updatePickOrderUi(orderedPicks);
 
   orderedPicks.forEach((n, index) => {
-    const s = getStatus(n.id);
+    const rankClass = index < 3 ? 'rank-top' : 'rank-rest';
     const chip = document.createElement('button');
     chip.type = 'button';
     chip.draggable = true;
-    chip.className = 'pick-chip ' + s + (index === 0 ? ' is-top-pick' : '');
+    chip.className = 'pick-chip ' + rankClass + (index === 0 ? ' is-top-pick' : '');
     chip.dataset.id = n.id;
     chip.title = index === 0 ? 'Current front-runner — drag to re-rank' : 'Drag to re-rank';
     chip.innerHTML = `<span class="pick-rank">${index + 1}</span><div class="chip-dot"></div><span class="pick-name">${n.name}</span><span class="drag-handle">⋮⋮</span>`;
