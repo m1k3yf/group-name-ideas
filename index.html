@@ -179,6 +179,22 @@ html[data-theme='light'] .rail-orb { box-shadow: 0 0 0 10px rgba(232,133,90,.07)
   font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--muted); margin-bottom: 16px; font-weight: 600;
 }
+.day-group { margin-bottom: 36px; }
+.day-group:last-child { margin-bottom: 0; }
+.day-group-header {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 16px; font-weight: 600;
+}
+.day-count-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px;
+  background: linear-gradient(135deg, rgba(240,194,127,.20), rgba(232,133,90,.12));
+  border: 1px solid rgba(232,133,90,.32);
+  color: var(--text-mid-2);
+  font-size: 11px; font-weight: 700; letter-spacing: 0;
+  text-transform: none; line-height: 1;
+}
 .picks-shell { margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border-soft); }
 .picks-toolbar {
   display: flex; align-items: center; justify-content: space-between;
@@ -761,8 +777,7 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
       </div>
       <div class="picks-strip" id="picksStrip"></div>
     </div>
-    <div class="today-header" id="todayBatchLabel"></div>
-    <div id="todayCards"></div>
+    <div id="todayDayGroups"></div>
   </div>
   <div class="tab-panel" id="panel-keepers">
     <div class="keepers-section">
@@ -2489,6 +2504,52 @@ const BATCHES = [
     ]
   },
   {
+    id:"b57", date:"May 23", label:"Batch 57 — Raw Nouns, Dialect & Bilingual Coins",
+    names:[
+      {id:"tasca",         name:"TASCA",         vibe:'[IT] "Pocket" — 2 syl, everyday Italian object noun, soft-hard balance, sounds confident in either mouth'},
+      {id:"volpe",         name:"VOLPE",         vibe:'[IT] "Fox" — 2 syl, cunning predator symbol, sharp V open A, hunter energy without a single brag'},
+      {id:"tempo",         name:"TEMPO",         vibe:'[IT] "Time" — 2 syl, music-coded by literal definition, marquee staple in any city worldwide'},
+      {id:"lampo",         name:"LAMPO",         vibe:'[IT] "Lightning/flash" — 2 syl, the sudden strike, photographic-flash energy, kinetic stage punch'},
+      {id:"sapore",        name:"SAPORE",        vibe:'[IT] "Flavor/taste" — 3 syl, sensory Italian luxe noun, R&B grown register, dinner-table chic'},
+      {id:"strada",        name:"STRADA",        vibe:'[IT] "Street/road" — 2 syl, the street itself, NY-block coded yet pure Italian, where it all happens'},
+      {id:"rover",         name:"ROVER",         vibe:'[EN] 2 syl — the one who roams the streets, R&B grown-and-sexy register, NY streetwalker built-in'},
+      {id:"spade",         name:"SPADE",         vibe:'[EN] 1 syl — card-suit confidence, hip-hop register sharp single-syl punch, the cut that wins'},
+      {id:"dagger",        name:"DAGGER",        vibe:'[EN] 2 syl — sharp blade, double-G punch, hip-hop register edge, marquee-clean weapon noun'},
+      {id:"tonic",         name:"TONIC",         vibe:'[EN] 2 syl — the lift, the music-key sense, NY bar-coded, grown & sexy uplift'},
+      {id:"frost",         name:"FROST",         vibe:'[EN] 1 syl — icy single-syl strike, hip-hop register cool, the chill that lands hard'},
+      {id:"keeper",        name:"KEEPER",        vibe:'[EN] 2 syl — the one who holds it down, neighborhood-coded honor, the trusted hand'},
+      {id:"rovercaldo",    name:"ROVERCALDO",    vibe:'[MIX] rover + caldo — warm rover. English streetwalker meets Italian warmth, grown & sexy bilingual'},
+      {id:"daggervita",    name:"DAGGERVITA",    vibe:'[MIX] dagger + vita — blade life. English edge meets Italian soul, hip-hop bilingual with weight'},
+      {id:"keeperluce",    name:"KEEPERLUCE",    vibe:'[MIX] keeper + luce — keeper of light. English trust meets Italian luminance, R&B luxe bilingual'},
+      {id:"frostnotte",    name:"FROSTNOTTE",    vibe:'[MIX] frost + notte — frost night. English chill meets Italian dark, the cold hour bilingual'},
+      {id:"spadefuoco",    name:"SPADEFUOCO",    vibe:'[MIX] spade + fuoco — spade fire. English cut meets Italian flame, marquee bilingual punch'},
+      {id:"tonicvita",     name:"TONICVITA",     vibe:'[MIX] tonic + vita — tonic life. English lift meets Italian soul, grown & sexy bilingual uplift'},
+    ]
+  },
+  {
+    id:"b58", date:"May 24", label:"Batch 58 — Raw Nouns, Dialect & Bilingual Coins",
+    names:[
+      {id:"capra",         name:"CAPRA",         vibe:'[IT] "Goat" — 2 syl, rough rural Southern Italian noun, hard K punch, marquee-sharp animal weight'},
+      {id:"carro",         name:"CARRO",         vibe:'[IT] "Cart/wagon" — 2 syl, rural Italian double-R growl, processione coded, the vehicle of celebration'},
+      {id:"amaro",         name:"AMARO",         vibe:'[IT] "Bitter" — 3 syl, the post-dinner digestif, grown & sexy by literal definition, late-night Italian luxe'},
+      {id:"scettro",       name:"SCETTRO",       vibe:'[IT] "Scepter" — 2 syl, the staff of authority, royal weight without the "kings" pattern'},
+      {id:"grifo",         name:"GRIFO",         vibe:'[IT] "Griffin" — 2 syl, mythic predator from Italian heraldry, hip-hop register fierce'},
+      {id:"folata",        name:"FOLATA",        vibe:'[IT] "Gust" — 3 syl, sudden wind, weather-coded movement, light on the tongue, lyrical'},
+      {id:"pigeon",        name:"PIGEON",        vibe:'[EN] 2 syl — NYC street bird, urban underdog reclaim, hip-hop ironic edge, the bird that owns the city'},
+      {id:"rival",         name:"RIVAL",         vibe:'[EN] 2 syl — the one across the table, hip-hop register competitive, marquee-clean confidence'},
+      {id:"brigade",       name:"BRIGADE",       vibe:'[EN] 2 syl — military crew unit, grown weight without "kings/sons", the unit moving together'},
+      {id:"stagger",       name:"STAGGER",       vibe:'[EN] 2 syl — the walk of swagger / exhaustion, double-G punch, hip-hop register'},
+      {id:"harpoon",       name:"HARPOON",       vibe:'[EN] 2 syl — sailor weapon, NY waterfront-coded, the strike that sticks'},
+      {id:"compass",       name:"COMPASS",       vibe:'[EN] 2 syl — navigation noun, NY crossroads coded, the tool that finds the way'},
+      {id:"brigadevita",   name:"BRIGADEVITA",   vibe:'[MIX] brigade + vita — brigade life. English unit meets Italian soul, crew bilingual'},
+      {id:"staggervita",   name:"STAGGERVITA",   vibe:'[MIX] stagger + vita — stagger life. English swagger meets Italian soul, marquee bilingual punch'},
+      {id:"harpoonfiero",  name:"HARPOONFIERO",  vibe:'[MIX] harpoon + fiero — proud harpoon. English waterfront weapon meets Italian pride, hip-hop bilingual'},
+      {id:"rivalnotte",    name:"RIVALNOTTE",    vibe:'[MIX] rival + notte — night rival. English competitor meets Italian dark, the after-hours rival bilingual'},
+      {id:"compassoro",    name:"COMPASSORO",    vibe:'[MIX] compass + oro — golden compass. English navigation meets Italian gold, R&B luxe bilingual'},
+      {id:"pigeonluce",    name:"PIGEONLUCE",    vibe:'[MIX] pigeon + luce — pigeon light. NYC street bird meets Italian luminance, gritty-luxe bilingual'},
+    ]
+  },
+  {
     id:"custom", date:"Custom", label:"Manually Added",
     names:[
       {id:"custom-good-guai", name:"GOOD GUAI", vibe:'[BILINGUAL PUN] Sounds like "good guy" / means "good troubles" — sharp clever pun, not a portmanteau, GUAI cluster anchor'},
@@ -3550,8 +3611,12 @@ function render() {
   // "latest" should always be the most recent scheduled batch, never the Custom batch
   const latest = [...BATCHES].reverse().find(b => b.id !== 'custom') || BATCHES[BATCHES.length - 1];
   const orderedPicks = syncPickOrder([...starred, ...maybe]);
-  const newInLatest = latest.names.filter(n => getStatus(n.id) === 'unreviewed').length;
-  document.getElementById('todayBadge').textContent    = newInLatest > 0 ? newInLatest + ' new' : 'done';
+  // Today badge counts unreviewed across the most recent week (not just the latest batch)
+  const recentBatchesForBadge = recentWeekBatches();
+  const newInWeek = (recentBatchesForBadge.length ? recentBatchesForBadge : [latest])
+    .flatMap(b => b.names)
+    .filter(n => getStatus(n.id) === 'unreviewed').length;
+  document.getElementById('todayBadge').textContent    = newInWeek > 0 ? newInWeek + ' new' : 'done';
   document.getElementById('keepersBadge').textContent  = starred.length + maybe.length;
   document.getElementById('inreviewBadge').textContent = unreviewed.length > 0 ? unreviewed.length : '';
   const archiveBadge = document.getElementById('archiveBadge');
@@ -3622,17 +3687,75 @@ function renderToday(starred, maybe, latest, orderedPicks = null) {
     strip.innerHTML = '<div style="font-size:13px;color:var(--muted)">No picks yet — star or maybe names below</div>';
   }
 
-  document.getElementById('todayBatchLabel').textContent = `${latest.date} — ${latest.label}`;
-
-  const container = document.getElementById('todayCards');
+  const container = document.getElementById('todayDayGroups');
   container.innerHTML = '';
-  const visible = latest.names.filter(n => getStatus(n.id) !== 'rejected');
-  const unrev   = visible.filter(n => getStatus(n.id) === 'unreviewed');
-  const reviewed = visible.filter(n => getStatus(n.id) !== 'unreviewed');
-  [...unrev, ...reviewed].forEach(n => container.appendChild(makeCard(n)));
-  if (!visible.length) {
-    container.innerHTML = '<div class="empty-state">All names in this batch reviewed.<br>Check back tomorrow for a new batch.</div>';
-  }
+
+  // Find every non-custom batch from the last 7 days that still has unreviewed names.
+  // Fall back to the latest batch when nothing recent remains unreviewed.
+  let groups = recentWeekBatches().filter(b =>
+    b.names.some(n => getStatus(n.id) === 'unreviewed')
+  );
+  if (!groups.length) groups = [latest];
+
+  groups.forEach(batch => {
+    const visible  = batch.names.filter(n => getStatus(n.id) !== 'rejected');
+    const unrev    = visible.filter(n => getStatus(n.id) === 'unreviewed');
+    const reviewed = visible.filter(n => getStatus(n.id) !== 'unreviewed');
+
+    const group = document.createElement('div');
+    group.className = 'day-group';
+
+    const header = document.createElement('div');
+    header.className = 'day-group-header';
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = `${batch.date} — ${batch.label}`;
+    header.appendChild(labelSpan);
+    if (unrev.length > 0) {
+      const badge = document.createElement('span');
+      badge.className = 'day-count-badge';
+      badge.title = `${unrev.length} unreviewed`;
+      badge.textContent = unrev.length;
+      header.appendChild(badge);
+    }
+    group.appendChild(header);
+
+    if (!visible.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = 'All names in this batch reviewed.<br>Check back tomorrow for a new batch.';
+      group.appendChild(empty);
+    } else {
+      [...unrev, ...reviewed].forEach(n => group.appendChild(makeCard(n)));
+    }
+
+    container.appendChild(group);
+  });
+}
+
+// Parse a batch date string (e.g. "May 22") into a Date, anchored to today's
+// year. If parsing makes it land in the future, roll back one year.
+function parseBatchDate(str) {
+  if (!str || str === 'Custom') return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const yr = today.getFullYear();
+  const d = new Date(`${str} ${yr}`);
+  if (isNaN(d.getTime())) return null;
+  d.setHours(0,0,0,0);
+  if (d.getTime() > today.getTime()) d.setFullYear(yr - 1);
+  return d;
+}
+
+// Return non-custom batches whose date falls within the last 7 days
+// (today inclusive), sorted newest-first.
+function recentWeekBatches() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekStart = new Date(today); weekStart.setDate(weekStart.getDate() - 6);
+  return BATCHES
+    .filter(b => b.id !== 'custom')
+    .map(b => ({ batch: b, date: parseBatchDate(b.date) }))
+    .filter(x => x.date && x.date.getTime() >= weekStart.getTime() && x.date.getTime() <= today.getTime())
+    .sort((a, b) => b.date - a.date)
+    .map(x => x.batch);
 }
 
 function renderKeepers(starred, maybe) {
