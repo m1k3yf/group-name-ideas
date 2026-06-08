@@ -1306,7 +1306,7 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
 import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, set, update, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 import { getAnalytics }                           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 // ─────────────────────────────────────────────
 // FIREBASE
@@ -1325,16 +1325,51 @@ const db = getDatabase(app);
 try { getAnalytics(app); } catch(_) {}
 
 // ─────────────────────────────────────────────
-// AUTH — anonymous sign-in so security rules can require auth != null
+// AUTH — Google Sign-In with email allowlist
+// Only these two accounts can read/write; enforced both client-side and in
+// database.rules.json. To add a user: update both lists.
 // ─────────────────────────────────────────────
 const auth = getAuth(app);
+const ALLOWED_EMAILS = ['mikefiume13@gmail.com', 'anthonyfiume09@gmail.com'];
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' });
+
+function showSignInOverlay(errorMsg) {
+  let el = document.getElementById('signInOverlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'signInOverlay';
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:20px;color:#fff;font-family:system-ui,-apple-system,sans-serif;padding:20px;text-align:center;';
+    el.innerHTML = '<div style="font-size:22px;font-weight:600;letter-spacing:.5px;">Group Name Ideas</div><div id="signInMsg" style="font-size:14px;opacity:.7;max-width:340px;line-height:1.5;">Sign in with an authorized Google account to continue.</div><button id="signInBtn" style="background:#fff;color:#111;border:none;padding:12px 28px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">Sign in with Google</button>';
+    document.body.appendChild(el);
+    document.getElementById('signInBtn').onclick = () => {
+      signInWithPopup(auth, provider).catch(err => {
+        console.error('Sign-in failed:', err);
+        document.getElementById('signInMsg').textContent = 'Sign-in failed: ' + (err.message || err.code);
+      });
+    };
+  }
+  if (errorMsg) document.getElementById('signInMsg').textContent = errorMsg;
+  el.style.display = 'flex';
+}
+function hideSignInOverlay() {
+  const el = document.getElementById('signInOverlay');
+  if (el) el.style.display = 'none';
+}
+
 const authReady = new Promise(resolve => {
-  onAuthStateChanged(auth, user => {
-    if (user) resolve(user);
-  });
-  signInAnonymously(auth).catch(err => {
-    console.error('Anonymous sign-in failed:', err);
-    document.getElementById('liveDot')?.classList.add('offline');
+  onAuthStateChanged(auth, async user => {
+    if (user && user.email && ALLOWED_EMAILS.includes(user.email.toLowerCase())) {
+      hideSignInOverlay();
+      resolve(user);
+    } else if (user) {
+      // Signed in but not on the allowlist — sign out and prompt again.
+      const blockedEmail = user.email || '(unknown)';
+      await signOut(auth).catch(() => {});
+      showSignInOverlay(`Account ${blockedEmail} is not authorized. Try a different account.`);
+    } else {
+      showSignInOverlay();
+    }
   });
 });
 
@@ -2747,6 +2782,99 @@ const BATCHES = [
     ]
   },
   {
+    id:"b62", date:"May 29", label:"Batch 62 — Raw Nouns, Dialect & Bilingual Coins",
+    names:[
+      {id:"grinta",         name:"GRINTA",         vibe:'[IT] "Grit/determination" — 2 syl, the Italian word for the exact English concept, hip-hop register built right in, marquee-sharp'},
+      {id:"cicala",         name:"CICALA",         vibe:'[IT] "Cicada" — 3 syl, the literal soundtrack of Southern Italian summer, sonic by definition, Campanian August coded'},
+      {id:"liscio",         name:"LISCIO",         vibe:'[IT] "Smooth/slick" + Italian ballroom dance — 2 syl, R&B grown & sexy by definition, music-coded double meaning'},
+      {id:"molla",          name:"MOLLA",          vibe:'[IT] "Spring/coil" — 2 syl, kinetic tension noun, the energy stored before the release, percussive double-L'},
+      {id:"chiave",         name:"CHIAVE",         vibe:'[IT] "Key" — 2 syl, musical-key double meaning built right in, the thing that opens every door, marquee-clean'},
+      {id:"maglia",         name:"MAGLIA",         vibe:'[IT] "Jersey/knit shirt" — 2 syl, Italian soccer-culture coded, the colors you wear, NY-Italian street register'},
+      {id:"ovation",        name:"OVATION",        vibe:'[EN] 3 syl — applause as a noun, music-coded by definition, the standing reaction the show earns, marquee-massive'},
+      {id:"stellar",        name:"STELLAR",        vibe:'[EN] 2 syl — sounds 100% Italian-adjacent, R&B grown & sexy register, the top-tier qualifier turned proper noun'},
+      {id:"soul",           name:"SOUL",           vibe:'[EN] 1 syl — music-coded by definition, R&B genre lineage built right in, untested single-syl, the word every Italian-American grandmother used about food'},
+      {id:"steel",          name:"STEEL",          vibe:'[EN] 1 syl — NYC industrial coded, the bridge cables and the skyscraper bones, marquee-sharp, hip-hop register'},
+      {id:"mirror",         name:"MIRROR",         vibe:'[EN] 2 syl — R&B grown & sexy reflection register, double-R punch, the look you give yourself before walking out'},
+      {id:"descent",        name:"DESCENT",        vibe:'[EN] 2 syl — diaspora-coded by definition (lineage + downward motion), the Italian-American family tree in one English noun'},
+      {id:"soulvita",       name:"SOULVITA",       vibe:'[MIX] soul + vita — soul life. English R&B-coded music genre meets Italian "life," grown & sexy bilingual, sounds like a record label'},
+      {id:"steelnotte",     name:"STEELNOTTE",     vibe:'[MIX] steel + notte — steel night. NYC industrial meets iconic Italian dark, hip-hop register bilingual, marquee-sharp'},
+      {id:"chiaveoro",      name:"CHIAVEORO",      vibe:'[MIX] chiave + oro — golden key. Italian key meets Italian gold, sounds 100% naturally born Italian, R&B luxe four-syllable shimmer'},
+      {id:"grintafuoco",    name:"GRINTAFUOCO",    vibe:'[MIX] grinta + fuoco — grit fire. Italian determination meets Italian flame, sounds like a real Italian compound, hip-hop bilingual'},
+      {id:"mirrorscuro",    name:"MIRRORSCURO",    vibe:'[MIX] mirror + scuro — dark mirror. R&B reflection meets Italian shadow, the look in low light, grown & sexy bilingual'},
+      {id:"ovationero",     name:"OVATIONERO",     vibe:'[MIX] ovation + nero — black ovation. English applause meets Italian dark, music-coded after-hours, sounds naturally born coined'},
+    ]
+  },
+  {
+    id:"b63", date:"May 30", label:"Batch 63 — Raw Nouns, Dialect & Bilingual Coins",
+    names:[
+      {id:"altano",         name:"ALTANO",         vibe:'[IT] "North mountain wind / weathervane" — 3 syl, atmospheric Campanian elemental, sits naturally between Scirocco and Grecale, marquee-clean'},
+      {id:"vendetta",       name:"VENDETTA",       vibe:'[IT] "Vendetta" — 3 syl, English borrowed it whole, the most iconic Italian-American noun, marquee-massive in any accent'},
+      {id:"lancio",         name:"LANCIO",         vibe:'[IT] "Launch/throw" — 2 syl, kinetic projectile by definition, the moment something flies, sharp Italian noun'},
+      {id:"nusco",          name:"NUSCO",          vibe:'[IT] Real Irpinian hilltop town near Volturara — 2 syl of deep ancestral insider, almost reads English, sounds like a Brooklyn block'},
+      {id:"garzone",        name:"GARZONE",        vibe:'[IT] "Apprentice/young worker" — 3 syl, old-world Italian-American craft-coded, the kid earning his place at the shop'},
+      {id:"sciantosa",      name:"SCIANTOSA",      vibe:'[IT/Neapolitan] Early-1900s Naples café singer — 4 syl, music-coded by literal definition, pure Campanian stage lineage'},
+      {id:"atrium",         name:"ATRIUM",         vibe:'[EN] Roman central courtyard — 3 syl, sounds 100% Italian-adjacent (atrio), architectural and grown, the open heart of the house'},
+      {id:"neon",           name:"NEON",           vibe:'[EN] Glowing electric tube — 2 syl, NYC marquee coded by literal definition, the sign every venue uses, hip-hop register'},
+      {id:"vintage",        name:"VINTAGE",        vibe:'[EN] Aged refinement — 2 syl, Italian wine-country coded, sounds Italian-adjacent, grown & sexy register, value that earns itself'},
+      {id:"circuit",        name:"CIRCUIT",        vibe:'[EN] Electric pathway / venue tour — 2 syl, double meaning of current and circuit, music-coded by definition'},
+      {id:"shelter",        name:"SHELTER",        vibe:'[EN] Safe space — 2 syl, R&B grown register intimate, the place that takes you in after the storm'},
+      {id:"prophet",        name:"PROPHET",        vibe:'[EN] Voice-carrier of what\'s coming — 2 syl, biblical weight, hip-hop register lineage built right in, marquee-massive'},
+      {id:"neonotte",       name:"NEONOTTE",       vibe:'[MIX] neon + notte — neon night. NYC marquee glow meets iconic Italian dark, sounds naturally born coined, marquee-perfect by definition'},
+      {id:"vintagefuoco",   name:"VINTAGEFUOCO",   vibe:'[MIX] vintage + fuoco — vintage fire. English aged luxe meets Italian flame, grown & sexy bilingual heat with backbone'},
+      {id:"atriumnero",     name:"ATRIUMNERO",     vibe:'[MIX] atrium + nero — dark atrium. Roman courtyard at midnight, sounds 100% naturally born Italian, architectural bilingual'},
+      {id:"circuitscuro",   name:"CIRCUITSCURO",   vibe:'[MIX] circuit + scuro — dark circuit. Electric pathway meets Italian shadow, the venue tour after hours, hip-hop bilingual'},
+      {id:"lancioluce",     name:"LANCIOLUCE",     vibe:'[MIX] lancio + luce — launch of light. Kinetic Italian projectile meets glow, sounds 100% naturally born Italian, four-syllable shimmer'},
+      {id:"prophetvita",    name:"PROPHETVITA",    vibe:'[MIX] prophet + vita — prophet life. English biblical voice-carrier meets Italian soul, hip-hop register bilingual declaration'},
+    ]
+  },
+  {
+    id:"b64", date:"May 31", label:"Batch 64 — Raw Nouns, Dialect & Bilingual Coins",
+    names:[
+      {id:"falcone",         name:"FALCONE",         vibe:'[IT] "Big falcon" + iconic Italian surname (Judge Falcone) — 3 syl, DRAGHÌ predator direction with built-in cultural weight, marquee-massive'},
+      {id:"ghepardo",        name:"GHEPARDO",        vibe:'[IT] "Cheetah" — 3 syl, sleek predator in the LUPI/DRAGHÌ direction, Il Gattopardo lineage built right in, sounds expensive'},
+      {id:"calamita",        name:"CALAMITA",        vibe:'[IT] "Magnet" — 4 syl, the pull that draws everyone in, false-friend with English "calamity" for sneaky double weight'},
+      {id:"cinque",          name:"CINQUE",          vibe:'[IT numeral] "Five" — 2 syl, untested numeric category like SETTE, NY-Italian dice-game coded, marquee-tight'},
+      {id:"tondo",           name:"TONDO",           vibe:'[IT] "Round/circle" — 2 syl, Renaissance Madonna-circle painting form, art-coded heritage, sits clean on any poster'},
+      {id:"castigo",         name:"CASTIGO",         vibe:'[IT] "Punishment/chastisement" — 3 syl, GUAI register, what nonna threatened, biblical-Italian weight in any mouth'},
+      {id:"maverick",        name:"MAVERICK",        vibe:'[EN] 3 syl — the unbranded one, lone-rebel hip-hop register, NY-Italian outsider energy, marquee-iconic'},
+      {id:"trophy",          name:"TROPHY",          vibe:'[EN] 2 syl — hip-hop coded prize, what every Italian-American family kept on the mantelpiece, marquee-clean swagger'},
+      {id:"chisel",          name:"CHISEL",          vibe:'[EN] 2 syl — Italian-sculptor craft translated, what carves marble into David, raw creation tool, R&B grown register'},
+      {id:"stake",           name:"STAKE",           vibe:'[EN] 1 syl — high-stakes hip-hop register, the assertion driven into the ground, untested single-syl category, marquee-sharp'},
+      {id:"glory",           name:"GLORY",           vibe:'[EN] 2 syl — regal without "kings" or "sons" pattern, gospel-coded ascent, the win in one Italian-American grandmother\'s favorite word'},
+      {id:"motive",          name:"MOTIVE",          vibe:'[EN] 2 syl — what drives everything, music-coded double meaning (motif), sounds Italian-adjacent (motivo), hip-hop register'},
+      {id:"falconeoro",      name:"FALCONEORO",      vibe:'[MIX] falcone + oro — golden falcon. Italian predator meets Italian gold, sounds 100% naturally born Italian, marquee-luxe'},
+      {id:"calamitanero",    name:"CALAMITANERO",    vibe:'[MIX] calamita + nero — dark magnet. The pull through midnight, sounds 100% naturally born Italian, five-syllable cinematic'},
+      {id:"trophyvita",      name:"TROPHYVITA",      vibe:'[MIX] trophy + vita — trophy life. Hip-hop English prize meets Italian soul, R&B grown & sexy bilingual swagger'},
+      {id:"chiselfiero",     name:"CHISELFIERO",     vibe:'[MIX] chisel + fiero — proud chisel. English sculpting tool meets Italian confidence, craft with backbone, bilingual artisanship'},
+      {id:"mavericksuro",    name:"MAVERICKSCURO",   vibe:'[MIX] maverick + scuro — dark maverick. English lone rebel meets Italian shadow, the unbranded one walking after midnight'},
+      {id:"gloryfuoco",      name:"GLORYFUOCO",      vibe:'[MIX] glory + fuoco — glory fire. English gospel ascent meets Italian flame, marquee-massive bilingual triumph'},
+    ]
+  },
+  {
+    id:"b65", date:"June 1", label:"Batch 65 — Raw Nouns, Dialect & Bilingual Coins",
+    names:[
+      {id:"acume",          name:"ACUME",          vibe:'[IT] "Acumen/sharpness" — 3 syl, sleek Italian intellect, the cunning behind the swagger, marquee-clean'},
+      {id:"balza",          name:"BALZA",          vibe:'[IT] "Cliff/leap/flounce" — 2 syl, kinetic raw noun, the edge before the jump, sweet-spot syllables'},
+      {id:"esca",           name:"ESCA",           vibe:'[IT] "Bait/lure" — 2 syl, predator-energy noun in the LUPI/DRAGHÌ direction, the trap set in plain sight'},
+      {id:"ghigna",         name:"GHIGNA",         vibe:'[IT/dialect] "Smirk/leer" — 2 syl, GUAI cluster register, the face the wiseguys make right before something happens'},
+      {id:"scarto",         name:"SCARTO",         vibe:'[IT] "Discard/swerve/scrap" — 2 syl, racing-coded dodge, also the cast-aside one rising up, NY underdog energy'},
+      {id:"scocca",         name:"SCOCCA",         vibe:'[IT] "Shell/chassis/it strikes" — 2 syl, hard consonants, double meaning of body+action, marquee-percussive'},
+      {id:"clutch",         name:"CLUTCH",         vibe:'[EN] 1 syl — NY hip-hop register, the moment everything\'s on the line, sounds great in any mouth, untested single-syl swagger'},
+      {id:"fever",          name:"FEVER",          vibe:'[EN] 2 syl — R&B grown & sexy, the heat that grips you, Peggy Lee classic + Italian-American passion'},
+      {id:"nectar",         name:"NECTAR",         vibe:'[EN] 2 syl — sweet R&B coded, Greek-mythic juice of the gods, sounds Italian-adjacent (nettare), grown register'},
+      {id:"reign",          name:"REIGN",          vibe:'[EN] 1 syl — regal without "kings" or "sons" pattern, hip-hop coronation energy, marquee-massive in one syllable'},
+      {id:"vellum",         name:"VELLUM",         vibe:'[EN] 2 syl — ancient parchment, scribal heritage, sounds Italian-adjacent (velluto=velvet), Renaissance-coded craft'},
+      {id:"talisman",       name:"TALISMAN",       vibe:'[EN] 3 syl — mystic charm, malocchio-adjacent in English, the protection worn close, R&B grown register'},
+      {id:"acumenotte",     name:"ACUMENOTTE",     vibe:'[MIX] acume + notte — sharp night. Italian acumen meets midnight, sounds 100% naturally born Italian, four-syllable cinematic'},
+      {id:"clutchvita",     name:"CLUTCHVITA",     vibe:'[MIX] clutch + vita — clutch life. NY hip-hop moment meets Italian soul, R&B bilingual high-stakes swagger'},
+      {id:"feverfuoco",     name:"FEVERFUOCO",     vibe:'[MIX] fever + fuoco — fever fire. English heat meets Italian flame, R&B grown bilingual burn'},
+      {id:"nectarscuro",    name:"NECTARSCURO",    vibe:'[MIX] nectar + scuro — dark nectar. English sweet meets Italian shadow, the after-hours pour, R&B coded'},
+      {id:"reignfiero",     name:"REIGNFIERO",     vibe:'[MIX] reign + fiero — proud reign. English coronation meets Italian backbone, marquee-massive bilingual'},
+      {id:"balzaluce",      name:"BALZALUCE",      vibe:'[MIX] balza + luce — leap of light. Italian cliff-jump meets glow, sounds 100% naturally born Italian, kinetic shimmer'},
+      {id:"escanero",       name:"ESCANERO",       vibe:'[MIX] esca + nero — dark bait. Italian predator-lure meets shadow, sounds 100% naturally born Italian, after-hours menace'},
+    ]
+  },
+  {
     id:"custom", date:"Custom", label:"Manually Added",
     names:[
       {id:"custom-good-guai", name:"GOOD GUAI", vibe:'[BILINGUAL PUN] Sounds like "good guy" / means "good troubles" — sharp clever pun, not a portmanteau, GUAI cluster anchor'},
@@ -3384,11 +3512,15 @@ authReady.then(() =>
     })
 );
 
-// Real-time listener — syncs all clients
-onValue(
-  ref(db, '/'),
-  snapshot => {
-    const data = snapshot.val() || {};
+// Real-time listeners — syncs all clients.
+// Subscribed per-path (reviews / customNames / pickOrder / notes) instead of the
+// database root so the security rules don't need a root-level read grant.
+// Each listener updates a shared cache and re-runs the same apply logic, so
+// behavior is identical to the previous single root-snapshot listener.
+const _remote = { reviews: null, customNames: null, pickOrder: null, notes: null };
+
+function applyRemoteData() {
+    const data = _remote;
     reviews = { ...BAKED_STATE, ...(data.reviews || {}) };
 
     // Hydrate custom names from Firebase
@@ -3440,14 +3572,19 @@ onValue(
 
     document.getElementById('liveDot')?.classList.remove('offline');
     render();
-  },
-  err => {
+}
+
+function _remoteErr(err) {
     console.error('Firebase onValue failed:', err);
     hasHydratedPickOrder = true;
     document.getElementById('liveDot')?.classList.add('offline');
     render();
-  }
-);
+}
+
+onValue(ref(db, 'reviews'),     s => { _remote.reviews     = s.val(); applyRemoteData(); }, _remoteErr);
+onValue(ref(db, 'customNames'), s => { _remote.customNames = s.val(); applyRemoteData(); }, _remoteErr);
+onValue(ref(db, 'pickOrder'),   s => { _remote.pickOrder   = s.val(); applyRemoteData(); }, _remoteErr);
+onValue(ref(db, 'notes'),       s => { _remote.notes       = s.val(); applyRemoteData(); }, _remoteErr);
 
 // ─────────────────────────────────────────────
 // ACTIONS
