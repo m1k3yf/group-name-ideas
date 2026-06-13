@@ -1282,6 +1282,11 @@ html[data-theme='light'] .name-card.is-rejected { opacity: .42; }
       <div>
         <div class="tn-title">⚔ Showdown</div>
         <div class="tn-subtitle" id="tnSubtitle">Head-to-head between your keepers. No vibe notes, no rankings — just gut reaction. Trust the first instinct.</div>
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+          <span style="font-size:10px;opacity:.6;text-transform:uppercase;letter-spacing:.5px;">Pool:</span>
+          <button type="button" id="tnSrcKeepers" onclick="window.tnSetSource('keepers')">Keepers</button>
+          <button type="button" id="tnSrcApp" onclick="window.tnSetSource('app')">App-made names</button>
+        </div>
       </div>
       <button class="tn-close" onclick="window.closeTournament()" aria-label="Close">×</button>
     </div>
@@ -4448,10 +4453,70 @@ function tnWrite(state) {
   });
 }
 
+// Which pool the Showdown runs on: 'keepers' (starred/maybe) or 'app' (names you added in the app).
+let tnSource = 'keepers';
+
+function tnGetContestantsForSource(source) {
+  if (source === 'app') {
+    // All app-made (custom) names that haven't already been rejected.
+    return getCustomBatch().names
+      .filter(n => n && n.id && n.name && getStatus(n.id) !== 'rejected')
+      .map(n => ({ id: n.id, name: n.name }));
+  }
+  return tnGetContestants();
+}
+
+function tnStyleSrcBtns() {
+  const common = 'font-size:11px;padding:4px 11px;border-radius:999px;cursor:pointer;';
+  [['keepers', 'tnSrcKeepers'], ['app', 'tnSrcApp']].forEach(([s, id]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const on = tnSource === s;
+    el.style.cssText = common + (on
+      ? 'background:#caa53c;color:#1a1a1a;font-weight:700;border:1px solid #caa53c;'
+      : 'background:transparent;color:inherit;border:1px solid currentColor;opacity:.55;');
+  });
+}
+
+function tnSetSource(source) {
+  tnSource = source;
+  tnStyleSrcBtns();
+  const sub = document.getElementById('tnSubtitle');
+  if (sub) sub.textContent = source === 'app'
+    ? 'Head-to-head between names you added in the app. Pick each winner — then kill the losers at the end.'
+    : 'Head-to-head between your keepers. No vibe notes, no rankings — just gut reaction. Trust the first instinct.';
+  const overlay = document.getElementById('tournamentOverlay');
+  if (overlay && overlay.classList.contains('open')) {
+    const contestants = tnGetContestantsForSource(tnSource);
+    if (contestants.length < 2) { tnRenderEmpty(contestants.length); return; }
+    tnState = tnInit(contestants);
+    tnWrite(tnState);
+    tnRenderMatch();
+  }
+}
+
+// "Kill the losers" — mark losing contestants as Rejected (recoverable from Archive).
+function tnRejectContestant(id) {
+  if (getStatus(id) !== 'rejected') setStatus(id, 'rejected');
+  tnRenderResults();
+}
+
+function tnKillLosers() {
+  if (!tnState) return;
+  const { ranked } = tnComputeStandings(tnState);
+  const keep = Math.max(1, Math.ceil(ranked.length / 2));
+  const losers = ranked.slice(keep).filter(c => getStatus(c.id) !== 'rejected');
+  if (!losers.length) return;
+  if (!confirm('Reject the bottom ' + losers.length + ' name' + (losers.length === 1 ? '' : 's') + '? They move to your Archive and can be restored later.')) return;
+  losers.forEach(c => { if (getStatus(c.id) !== 'rejected') setStatus(c.id, 'rejected'); });
+  tnRenderResults();
+}
+
 function openTournament() {
-  const contestants = tnGetContestants();
+  const contestants = tnGetContestantsForSource(tnSource);
   const overlay = document.getElementById('tournamentOverlay');
   if (!overlay) return;
+  tnStyleSrcBtns();
   if (contestants.length < 2) {
     tnRenderEmpty(contestants.length);
     overlay.classList.add('open');
@@ -4474,10 +4539,14 @@ function closeTournament() {
 function tnRenderEmpty(count) {
   const body = document.getElementById('tnBody');
   if (!body) return;
+  const poolWord = tnSource === 'app' ? 'app-made name' : 'keeper';
+  const advice = tnSource === 'app'
+    ? 'Add some names in the app, then come back.'
+    : 'Star or "Maybe" some names, then come back.';
   body.innerHTML = `
     <div class="tn-empty">
-      You need <strong>at least two keepers</strong> to run a Showdown.<br>
-      You currently have <strong>${count}</strong>. Star or "Maybe" some names, then come back.
+      You need <strong>at least two ${poolWord}s</strong> to run a Showdown.<br>
+      You currently have <strong>${count}</strong> ${poolWord}${count === 1 ? '' : 's'}. ${advice}
     </div>
     <div class="tn-results-actions">
       <button class="tn-btn primary" type="button" onclick="window.closeTournament()">OK</button>
@@ -4586,24 +4655,27 @@ function tnRenderResults() {
         const w = wins[c.id] || 0;
         const pct = (w / maxPossible) * 100;
         const rankCls = i < 2 ? ' rank-' + (i + 1) : '';
+        const isRej = getStatus(c.id) === 'rejected';
         return `
-          <div class="tn-standing${rankCls}">
+          <div class="tn-standing${rankCls}" style="${isRej ? 'opacity:.45;' : ''}">
             <div class="tn-rank-num">${i + 1}</div>
-            <div class="tn-standing-name">${escapeHtml(c.name)}</div>
+            <div class="tn-standing-name">${escapeHtml(c.name)}${isRej ? ' <span style="font-size:11px;opacity:.8;">· rejected</span>' : ''}</div>
             <div class="tn-standing-bar"><div class="tn-standing-bar-fill" style="width:${pct}%"></div></div>
             <div class="tn-standing-record">${w}–${maxPossible - w}</div>
+            <button type="button" title="Reject this name" onclick="window.tnRejectContestant('${c.id}')" ${isRej ? 'disabled' : ''} style="margin-left:8px;border:none;background:transparent;cursor:${isRej ? 'default' : 'pointer'};font-size:14px;line-height:1;opacity:${isRej ? '.3' : '.85'};">✕</button>
           </div>`;
       }).join('')}
     </div>
     <div class="tn-results-actions">
       <button class="tn-btn" type="button" onclick="window.closeTournament()">Close</button>
+      <button class="tn-btn" type="button" onclick="window.tnKillLosers()" title="Reject the bottom half of the standings">⚔ Kill the losers</button>
       <button class="tn-btn primary" type="button" onclick="window.tnRestart()">Run Again</button>
     </div>
   `;
 }
 
 function tnRestart() {
-  const contestants = tnGetContestants();
+  const contestants = tnGetContestantsForSource(tnSource);
   if (contestants.length < 2) { tnRenderEmpty(contestants.length); return; }
   tnState = tnInit(contestants);
   tnWrite(tnState);
@@ -4635,6 +4707,9 @@ window.closeTournament  = closeTournament;
 window.tnPick           = tnPick;
 window.tnSkip           = tnSkip;
 window.tnRestart        = tnRestart;
+window.tnSetSource      = tnSetSource;
+window.tnRejectContestant = tnRejectContestant;
+window.tnKillLosers     = tnKillLosers;
 </script>
 </body>
 </html>
